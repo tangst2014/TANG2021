@@ -1,0 +1,12 @@
+<!--miniprogram/pages/inherit/inherit.wxml-->
+<view class="inherit">
+  <view wx:for="{{inherit}}" wx:key="index">
+      <block>
+        <view class="title">{{item.title}}</view>
+        <view class="content" wx:for="{{item.content}}"   wx:key="index" wx:for-item="scon">
+          <view class="title">{{scon.title}}</view>
+          <view class="scontent" wx:for="{{scon.scontent}}"  wx:key="index" wx:for-item="scontent">{{scontent}}</view>
+        </view>
+      </block>
+  </view>
+</view>

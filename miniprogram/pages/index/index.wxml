@@ -1,0 +1,66 @@
+<!--index.wxml-->
+
+<view class="container">
+  <image mode="aspectFit" src="/images/home.png"></image>
+  <!-- 用户 openid -->
+  <view class="userinfo">
+    <block wx:if="{{canIUseOpenData}}" class="userinfo-opendata">
+      <view class="userinfo-block-avatar" bindtap="bindViewTap">
+        <open-data type="userAvatarUrl"></open-data>
+      </view>
+    </block>
+    <block wx:elif="{{!hasUserInfo}}">
+      <button 
+        wx:if="{{canIUseGetUserProfile}}" 
+        bindtap="getUserProfile"
+        class="userinfo-avatar"
+        style="background-image: url({{avatarUrl}})"
+        size="default"
+      ></button>
+      <button
+        wx:else
+        open-type="getUserInfo" 
+        bindgetuserinfo="onGetUserInfo"
+        class="userinfo-avatar"
+        style="background-image: url({{avatarUrl}})"
+        size="default"
+      ></button>
+    </block>
+    <block wx:else>
+      <image bindtap="bindViewTap" class="userinfo-block-avatar" src="{{avatarUrl}}" mode="cover"></image>
+    </block>
+    <view class="userinfo-nickname-wrapper">
+      <button class="userinfo-nickname" bindtap="onGetOpenid">点击获取 openid</button>
+    </view>
+  </view>
+
+</view>
+
+<view class="inherit">
+  <navigator url="/pages/inherit/inherit?id=chuancheng" hover-class="navigator-hover">
+  <view wx:for="{{chuancheng}}" wx:key="index" class="inherit-item">
+    <view>
+        <view class="title">{{item.title}}</view>
+        <view class="content" wx:for="{{item.content}}"   wx:key="index" wx:for-item="scon">
+          <view class="stitle">{{scon.title}}</view>
+          <view class="scontent" >{{scon.scontent}}</view>
+        </view>
+    </view>
+    <view class="image"><image mode="aspectFit" src="/images/1.jpg"></image></view>
+  </view>
+  </navigator>  
+
+  <navigator url="/pages/inherit/inherit?id=xisu" hover-class="navigator-hover">
+  <view wx:for="{{xisu}}" wx:key="index" class="inherit-item">
+      <view>
+        <view class="title">{{item.title}}</view>
+        <view class="content">
+          <block wx:for="{{item.content}}"   wx:key="index" wx:for-item="scon">
+            {{scon.title}}
+          </block>
+        </view>
+      </view>
+      <view class="image"><image mode="aspectFit" src="/images/2.jpg"></image></view>
+  </view>
+  </navigator>
+</view>
