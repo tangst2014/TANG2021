@@ -1,66 +1,78 @@
-<!--index.wxml-->
-
-<view class="container">
-  <image mode="aspectFit" src="/images/home.png"></image>
-  <!-- 用户 openid -->
-  <view class="userinfo">
-    <block wx:if="{{canIUseOpenData}}" class="userinfo-opendata">
-      <view class="userinfo-block-avatar" bindtap="bindViewTap">
-        <open-data type="userAvatarUrl"></open-data>
-      </view>
-    </block>
-    <block wx:elif="{{!hasUserInfo}}">
-      <button 
-        wx:if="{{canIUseGetUserProfile}}" 
-        bindtap="getUserProfile"
-        class="userinfo-avatar"
-        style="background-image: url({{avatarUrl}})"
-        size="default"
-      ></button>
-      <button
-        wx:else
-        open-type="getUserInfo" 
-        bindgetuserinfo="onGetUserInfo"
-        class="userinfo-avatar"
-        style="background-image: url({{avatarUrl}})"
-        size="default"
-      ></button>
-    </block>
-    <block wx:else>
-      <image bindtap="bindViewTap" class="userinfo-block-avatar" src="{{avatarUrl}}" mode="cover"></image>
-    </block>
-    <view class="userinfo-nickname-wrapper">
-      <button class="userinfo-nickname" bindtap="onGetOpenid">点击获取 openid</button>
+<view class="customerBody">
+<l-form name="customer" l-form-btn-class="l-form-btn-class" bind:linsubmit="submit">
+    <l-form-item label="姓名:" name="customerName" rules="{{notNullRules}}">
+        <l-input id="customerName" value="{{customer.name}}" hide-label show-row="{{false}}"/>
+    </l-form-item>
+    <l-form-item label="手机:" name="customerPhone" rules="{{telphoneRules}}">
+        <l-input id="customerPhone" value="{{customer.phone}}" hide-label show-row="{{false}}"/>
+    </l-form-item>
+    <l-form-item label="地址:" name="customerAddress">
+        <l-input id="customerAddress" value="{{customer.address}}" hide-label show-row="{{false}}"/>
+    </l-form-item>
+    <view class="baby" hover-class="none" hover-stop-propagation="false">
+        <view class="tips">宝宝(点击下方+添加宝宝信息)：</view>
+        <view class="babyShow">
+            <block wx:for="{{customer.baby}}" wx:key="index" wx:for-item='baby'>
+                <view class="babyName">{{baby.babyName}}</view>
+            </block>
+            <view bindtap="addBabyInfo"><l-icon name="add"/></view>
+        </view>
     </view>
-  </view>
-
+    
+    
+    <view slot="submit">
+        <l-button>提交</l-button>
+    </view>
+    <view slot="reset">
+        <l-button type="default" plain>重置</l-button>
+    </view>
+</l-form>
 </view>
 
-<view class="inherit">
-  <navigator url="/pages/inherit/inherit?id=chuancheng" hover-class="navigator-hover">
-  <view wx:for="{{chuancheng}}" wx:key="index" class="inherit-item">
-    <view>
-        <view class="title">{{item.title}}</view>
-        <view class="content" wx:for="{{item.content}}"   wx:key="index" wx:for-item="scon">
-          <view class="stitle">{{scon.title}}</view>
-          <view class="scontent" >{{scon.scontent}}</view>
-        </view>
-    </view>
-    <view class="image"><image mode="aspectFit" src="/images/1.jpg"></image></view>
-  </view>
-  </navigator>  
+<l-mask show="{{maskShow}}" locked="{{true}}"> </l-mask>
+<l-toast
+show="{{toastShow}}"
+icon="error "
+title="请填写宝宝信息~"
+/>
+<l-toast
+show="{{toastSuccessShow}}"
+icon="success"
+title="保存成功~"
+/>
+<l-toast
+show="{{toastFailShow}}"
+icon="error"
+title="保存失败，请检查信息是否完整~"
+/>
 
-  <navigator url="/pages/inherit/inherit?id=xisu" hover-class="navigator-hover">
-  <view wx:for="{{xisu}}" wx:key="index" class="inherit-item">
-      <view>
-        <view class="title">{{item.title}}</view>
-        <view class="content">
-          <block wx:for="{{item.content}}"   wx:key="index" wx:for-item="scon">
-            {{scon.title}}
-          </block>
-        </view>
-      </view>
-      <view class="image"><image mode="aspectFit" src="/images/2.jpg"></image></view>
-  </view>
-  </navigator>
+<view class="babyBody" wx:if="{{isAddBabyInfo}}">
+<view class="tips t-center">添加宝宝信息</view>
+<l-form name="babyInfo" l-form-btn-class="l-form-btn-class" bind:linsubmit="saveBabyInfo">
+    <view class="babyInfo" hover-class="none" hover-stop-propagation="false">
+        <l-form-item label="宝宝姓名:" name="babyName" rules="{{notNullRules}}">
+            <l-input id="babyName" value="{{baby.babyName}}" hide-label show-row="{{false}}"/>
+        </l-form-item>
+        <l-form-item label="宝宝性别:" name="ruleSex" rules="{{notNullRules}}">
+            <l-radio-group id="ruleSex" placement="row">
+                <l-radio key="0">男</l-radio>
+                <l-radio key="1">女</l-radio>
+            </l-radio-group>
+        </l-form-item>
+        <l-form-item label="宝宝出生:" name="babyBirthday" bindtap="showCalender">
+            <l-calendar show="{{ isShowCalender }}" id="babyBirthday" type="single" bind:linconfirm="selectCalender" date="2000-1-1" format="yyyy-MM-dd" hide-label show-row="{{false}}"/>
+            <l-input id="showCalender" value="{{baby.babyBirthday}}" hide-label show-row="{{false}}" disabled="{{true}}"/>
+        </l-form-item>
+        <l-form-item label="宝宝所在区域:" name="babyRegion" rules="{{notNullRules}}">
+            <l-input id="babyRegion" value="{{baby.babyRegion}}" hide-label show-row="{{false}}"/>
+        </l-form-item>
+    </view>
+    <view slot="submit">
+        <l-button>保存</l-button>
+    </view>
+    <view slot="reset">
+        <l-button type="default" plain>重置</l-button>
+    </view>
+</l-form>
+<view class="t-center tips t-margin" bindtap="onBabyInfoBack">点错，不填了</view>
 </view>

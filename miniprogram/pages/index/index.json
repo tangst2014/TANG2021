@@ -1,3 +1,15 @@
 {
-  "usingComponents": {}
+  "usingComponents": {
+    "l-form":"/dist/lin-ui/form/index",
+    "l-form-item":"/dist/lin-ui/form-item/index",
+    "l-input":"/dist/lin-ui/input/index",
+    "l-counter":"/dist/lin-ui/counter/index",
+    "l-calendar":"/dist/lin-ui/calendar/index",
+    "l-radio-group":"/dist/lin-ui/radio-group/index",
+    "l-radio":"/dist/lin-ui/radio/index",
+    "l-icon":"/dist/lin-ui/icon/index",
+    "l-mask":"/dist/lin-ui/mask/index",
+    "l-toast":"/dist/lin-ui/toast/index",
+    "l-button":"/dist/lin-ui/button/index"
+  }
 }

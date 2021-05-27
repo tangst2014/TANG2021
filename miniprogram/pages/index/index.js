@@ -5,38 +5,54 @@ const db = wx.cloud.database({});
 const cont = db.collection('qingming');
 Page({
   data: {
-    avatarUrl: './user-unlogin.png',
-    userInfo: {},
-    hasUserInfo: false,
-    canIUseGetUserProfile: false,
-    canIUseOpenData: wx.canIUse('open-data.type.userAvatarUrl'), // 如需尝试获取用户信息可改为false
-    chuancheng:[],
-    xisu:[]
-  },
+    customer: 
+    {  // 顾客信息
+        customerName: '',
+        customerPhone: '',
+        customerAddress: '',
+        baby:[
+          // {   宝宝信息结构
+          //   babyName:'',
+          //   babyBirthday:'',
+          //   babyRegion:'' 
+          // }
+        ] // 顾客宝宝信息
+    },
+    isAddBabyInfo: false, // 是否添加宝宝信息
+    isAddBaby: true, // 防止添加宝宝数量的时候重复触发函数
+    isShowCalender: false, // 日历显示与隐藏
+    telphoneRules:{
+      required: true,
+      message: '请填写正确手机号码',
+      pattern: '^[1][3-9]{1}[0-9]{9}$',
+      trigger: 'blur',
+    },
+    notNullRules:{
+      type: 'string',
+      required: true,
+      message: '必选项不能为空',
+      trigger: 'blur',
+    },
+    toastShow: false, // 提示框
+    toastSuccessShow: false, // 成功提示
+    toastFailShow: false, // 失败提示
+    maskShow: false // 遮罩层
 
-  onLoad: function() {
-    if (!wx.cloud) {
-      wx.redirectTo({
-        url: '../chooseLib/chooseLib',
-      })
-      return
-    }
-    if (wx.getUserProfile) {
-      this.setData({
-        canIUseGetUserProfile: true,
-      })
-    }
-    var chuancheng = wx.getStorageSync('chuancheng')
-    var xisu = wx.getStorageSync('xisu')
-    if (!chuancheng||!xisu) {
-      this.getYunData()
-    }else{
-      this.setData({
-        chuancheng: chuancheng,
-        xisu:xisu
-      })
-    }
   },
+  onLoad: function() {
+    wx.lin.initValidateForm(this)  // 初始化lin-ui
+    // var chuancheng = wx.getStorageSync('chuancheng')
+    // var xisu = wx.getStorageSync('xisu')
+    // if (!chuancheng||!xisu) {
+    //   this.getYunData()
+    // }else{
+    //   this.setData({
+    //     chuancheng: chuancheng,
+    //     xisu:xisu
+    //   })
+    // }
+  },
+  // 访问云数据库   
   getYunData(){
     var _this = this;
     //1、引用数据库   
@@ -84,98 +100,111 @@ Page({
       }
     })
   },
-  getUserProfile() {
-    // 推荐使用wx.getUserProfile获取用户信息，开发者每次通过该接口获取用户个人信息均需用户确认，开发者妥善保管用户快速填写的头像昵称，避免重复弹窗
-    wx.getUserProfile({
-      desc: '展示用户信息', // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
-      success: (res) => {
-        this.setData({
-          avatarUrl: res.userInfo.avatarUrl,
-          userInfo: res.userInfo,
-          hasUserInfo: true,
-        })
-      }
+
+
+  // 点击出生输入框，显示日历
+  showCalender(){
+    this.setData({
+      isShowCalender : true
     })
   },
-
-  onGetUserInfo: function(e) {
-    if (!this.data.logged && e.detail.userInfo) {
-      this.setData({
-        logged: true,
-        avatarUrl: e.detail.userInfo.avatarUrl,
-        userInfo: e.detail.userInfo,
-        hasUserInfo: true,
-      })
+  // 点击日历填入数据
+  selectCalender(event){
+    console.log('~ index.js submit detail:',event.detail)
+    this.setData({
+      birthday:event.detail
+    })
+  },
+  // 添加宝宝信息
+  // maskShow控制遮罩层显示与隐藏，true为显示，同时设置了locked状态为true，即点击背景的时候不关闭
+  // isAddBabyInfo为添加宝宝信息弹出层，true为显示
+  addBabyInfo(e){
+    this.setData({
+      isAddBabyInfo:true,
+      maskShow:true   
+    })
+    
+    console.log('~ index.js addBabyInfo detail:')
+  },
+  // 宝宝信息保存
+  saveBabyInfo(event){
+    const {detail} = event;
+    // 若表单验证不正确，则返回
+    if(!detail.isValidate){  
+      return
     }
-  },
-
-  onGetOpenid: function() {
-    // 调用云函数
-    wx.cloud.callFunction({
-      name: 'login',
-      data: {},
-      success: res => {
-        console.log('[云函数] [login] user openid: ', res.result.openid)
-        app.globalData.openid = res.result.openid
-        wx.navigateTo({
-          url: '../userConsole/userConsole',
-        })
-      },
-      fail: err => {
-        console.error('[云函数] [login] 调用失败', err)
-        wx.navigateTo({
-          url: '../deployFunctions/deployFunctions',
-        })
-      }
+    // 如果宝宝保存超过5个，则返回
+    if(this.data.customer.baby.length>5){
+      return
+    }
+    console.log('~ index.js saveBabyInfo detail:',detail)
+    let {babyName,babyBirthday,babyRegion} = detail.values
+    this.data.customer.baby.push({babyName,babyBirthday,babyRegion})
+    this.setData({
+      isAddBabyInfo:false,
+      maskShow:false,   
+      ['customer.baby']:this.data.customer.baby
     })
+  
+    console.log('~ index.js saveBabyInfo this.data.customer.baby:',this.data.customer.baby)
+  },
+  // 返回主界面
+  onBabyInfoBack(){
+    this.setData({
+      isAddBabyInfo:false,
+      maskShow:false 
+        })
   },
 
-  // 上传图片
-  doUpload: function () {
-    // 选择图片
-    wx.chooseImage({
-      count: 1,
-      sizeType: ['compressed'],
-      sourceType: ['album', 'camera'],
-      success: function (res) {
-        wx.showLoading({
-          title: '上传中',
-        })
-
-        const filePath = res.tempFilePaths[0]
-        
-        // 上传图片
-        const cloudPath = `my-image${filePath.match(/\.[^.]+?$/)[0]}`
-        wx.cloud.uploadFile({
-          cloudPath,
-          filePath,
-          success: res => {
-            console.log('[上传文件] 成功：', res)
-
-            app.globalData.fileID = res.fileID
-            app.globalData.cloudPath = cloudPath
-            app.globalData.imagePath = filePath
-            
-            wx.navigateTo({
-              url: '../storageConsole/storageConsole'
-            })
-          },
-          fail: e => {
-            console.error('[上传文件] 失败：', e)
-            wx.showToast({
-              icon: 'none',
-              title: '上传失败',
-            })
-          },
-          complete: () => {
-            wx.hideLoading()
-          }
-        })
-      },
-      fail: e => {
-        console.error(e)
-      }
+  // 表单提交
+  submit(event){
+    const {detail} = event;
+    var that = this;
+    // 当isValidate为false时，表单数据校验不正确提示
+    if(!detail.isValidate){
+      that.setData({
+        toastFailShow:true
+      })
+      return
+    }
+    // 没有填写宝宝信息提示
+    if(!that.data.customer.baby.length){
+      that.setData({
+        toastShow:true
+      })
+      return
+    }
+    this.data.customer.customerName =  detail.values.customerName
+    this.data.customer.customerPhone = detail.values.customerPhone
+    this.data.customer.customerAddress =  detail.values.customerAddress
+    console.log('~ index.js submit customer:',this.data.customer)
+    that.setData({
+      toastSuccessShow:true
     })
+    /*
+      detail 返回三个参数
+      1、values: 各表单项的value值
+      2、errors: 各表单项验证后的返回的错误信息数组
+      3、isValidate: 表单是否验证通过的boolean值
+      具体格式示例：
+      detail = {
+         values: {
+             studentName: "",
+             studentAge: "",
+             studentAddress: ""
+         },
+         errors: {
+             studentName: [],
+             studentAge: [],
+             studentAddress: []
+         },
+         isValidate: true
+      }
+    */
+
+   
   },
+
+
 
 })

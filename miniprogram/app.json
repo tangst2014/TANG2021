@@ -1,45 +1,14 @@
 {
   "pages": [
-    "pages/index/index",
-    "pages/userConsole/userConsole",
-    "pages/storageConsole/storageConsole",
-    "pages/databaseGuide/databaseGuide",
-    "pages/addFunction/addFunction",
-    "pages/deployFunctions/deployFunctions",
-    "pages/chooseLib/chooseLib",
-    "pages/openapi/openapi",
-    "pages/openapi/serverapi/serverapi",
-    "pages/openapi/callback/callback",
-    "pages/openapi/cloudid/cloudid",
-    "pages/im/im",
-    "pages/im/room/room",
-    "pages/flowers/flowers",
-    "pages/inherit/inherit"
+    "pages/index/index"
+   
   ],
   "window": {
     "backgroundColor": "#F6F6F6",
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#F6F6F6",
-    "navigationBarTitleText": "清明",
+    "navigationBarTitleText": "大师",
     "navigationBarTextStyle": "black"
-  },
-  "tabBar": {
-    "custom": false,
-    "selectedColor": "#708985",
-    "list": [
-      {
-        "pagePath": "pages/index/index",
-        "text": "首页",
-        "iconPath": "/images/tabbar/1.2.png",
-        "selectedIconPath": "/images/tabbar/1.1.png"
-      },
-      {
-        "pagePath": "pages/flowers/flowers",
-        "text": "缅怀",
-        "iconPath": "/images/tabbar/2.2.png",
-        "selectedIconPath": "/images/tabbar/2.1.png"
-      }
-    ]
   },
   "sitemapLocation": "sitemap.json",
   "style": "v2"
