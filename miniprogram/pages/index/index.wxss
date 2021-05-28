@@ -6,11 +6,21 @@
 .tips{
     color:gray;
 }
+.t-flex{
+    display: flex;
+    align-items: center;
+}
 .t-center{
     text-align: center;
 }
 .t-margin{
     margin-top: 20px;
+}
+.t-font{
+    font-size: 30rpx;
+}
+.t-icon{
+    margin: 0 12px;
 }
 
 .customerBody{
@@ -18,21 +28,34 @@
 }
 .customerBody .baby{
     margin: 20rpx 20rpx 50rpx 20rpx;
+    word-break: break-all;
 }
 
 .customerBody .baby .babyShow{
-    margin-top: 20rpx;
+    margin: 10px;
     display: flex;
     justify-content: center;
-    align-items: center;
+    flex-direction: column;
+    text-align: center;
 }
 
 .customerBody .baby .babyShow .babyName{
-    border: 1rpx red solid;
+    
     margin: 0 20rpx;
     padding: 10rpx;
-
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
+.customerBody .baby .babyShow .babyName .edit{
+    border: 1rpx red solid;
+    width: 234rpx;
+    border-radius: 20rpx;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
 .babyBody{
     padding-top: 10px;
     position: fixed;

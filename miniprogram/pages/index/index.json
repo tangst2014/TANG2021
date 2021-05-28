@@ -10,6 +10,7 @@
     "l-icon":"/dist/lin-ui/icon/index",
     "l-mask":"/dist/lin-ui/mask/index",
     "l-toast":"/dist/lin-ui/toast/index",
-    "l-button":"/dist/lin-ui/button/index"
+    "l-button":"/dist/lin-ui/button/index",
+    "t-calendar":"/components/calendar/index"
   }
 }
