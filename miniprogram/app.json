@@ -1,7 +1,11 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/addwxGroup/addwxGroup"
+    "pages/wxGroupOne/wxGroupOne",
+    "pages/wxGroupFour/wxGroupFour",
+    "pages/wxGroupFive/wxGroupFive",
+    "pages/wxGroupThree/wxGroupThree",
+    "pages/wxGroupTwo/wxGroupTwo"
   ],
   "window": {
     "backgroundColor": "#F6F6F6",

@@ -14,6 +14,7 @@ exports.main = async (event, context) => {
       customerPhone: event.customerPhone,
       customerAddress: event.customerAddress,
       baby: event.baby,
+      userInfo: event.userInfo,
       time: event.time,
     },
     success: function (res) {

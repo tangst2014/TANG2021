@@ -1,4 +1,4 @@
-// miniprogram/pages/addwxGroup/addwxGroup.js
+// miniprogram/pages/wxGroupFour/wxGroupFour.js
 Page({
 
   /**

@@ -48,15 +48,28 @@ Page({
     toastFailShow: false, // 失败提示
     maskShow: false, // 遮罩层
     hasSubmit: false, //输入框禁用
+    // 获取用户信息
+    userInfo: {},
+    hasUserInfo: false ,
 
-
-
+    // 关注公众号是否加载失败
+    noGetOfficial: false ,
 
   },
   onLoad: function() {
-    console.log(' onLoad')
     var that = this 
-    wx.lin.initValidateForm(this)  // 使用linUI的 form 组件时需要在 onLoad 中调用 wx.lin.initValidateForm(this)进行初始化。
+    // 判断是否已经获取用户信息
+    var userInfo = wx.getStorageSync('userInfo')
+    if(userInfo){
+      that.setData({
+        userInfo: userInfo,
+        hasUserInfo: true 
+      })
+    }
+
+    // 使用linUI的 form 组件时需要在 onLoad 中调用 wx.lin.initValidateForm(this)进行初始化。
+    wx.lin.initValidateForm(this)  
+
     // 读取本地存储
     var customer = wx.getStorageSync('customerInfo')
     let age = ''
@@ -71,22 +84,9 @@ Page({
         hasSubmit:true
       })
     }      
-
-    // db.collection('erweima').get({   //图片
-    //   success: res => {
-    //     console.log(' ☀ index.js ▌ onLoad get erweima   ☞  res.data:',res.data)
-    //     that.setData({
-    //       erweima1:res.data[0].url,
-    //       erweima2:res.data[1].url,
-    //     })
-    //     wx.setStorage({
-    //       key: 'erweima',
-    //       data: res.data,
-    //     })
-    //   },
-    // })
-   // this.getCustomerInfoFun() // 测试
-    // var xisu = wx.getStorageSync('xisu')
+  },
+  onShow(options){
+    console.log('☀ index.js ▌ onShow ☞  option',options)
   },
   // 访问云数据库   
   getCustomerInfoFun(){
@@ -119,7 +119,6 @@ Page({
   },
   // 点击日历
   bindDateChange: function(e) {
-    console.log('picker发送选择改变，携带值为', e.detail.value)
     this.setData({
       'tempBaby.babyBirthday': e.detail.value
     })
@@ -142,7 +141,7 @@ Page({
     this.data.isAddorEdit = false
     this.data.tempIndex = e.currentTarget.dataset.index
     let tempBaby = this.data.customer.baby[this.data.tempIndex]
-    console.log(' ☀ index.js ▌ onBabyName ☞ 当前为修改信息:',tempBaby)
+    console.log(' ☀ index.js ▌ onBabyName ☞ 当前为修改信息 BabyInfo:',tempBaby)
     this.setData({
       isShowBabyInfo:true,
       maskShow:true,
@@ -196,7 +195,7 @@ Page({
       ['customer.baby']:this.data.customer.baby
     })
   
-    console.log(' ☀ index.js ▌ saveBabyInfo ☞  宝宝的信息:',this.data.customer.baby)
+    console.log(' ☀ index.js ▌ saveBabyInfo ☞  宝宝的信息 baby:',this.data.customer.baby)
   },
  
   // 返回主界面
@@ -209,6 +208,10 @@ Page({
 
   // 表单提交
   submit(event){
+    // 已经弹窗获取用户信息，不在弹出
+    if(!this.data.hasUserInfo){
+      this.getUserProfile()
+    }
     const {detail} = event;
     var that = this;
     // 当isValidate为false时，表单数据校验不正确提示
@@ -225,10 +228,23 @@ Page({
       })
       return
     }
+    // 确认框
+    wx.showModal({
+      title: '确认提交',
+      content: '提交之后不能再修改！',
+      success: function (res) {
+        if (res.confirm) {
+          
+        } else {
+          return
+        }
+      }
+    })
+
     this.data.customer.customerName =  detail.values.customerName
     this.data.customer.customerPhone = detail.values.customerPhone
     this.data.customer.customerAddress =  detail.values.customerAddress
-    console.log('~ index.js submit customer 提交到数据库的信息:',this.data.customer)
+    console.log('☀ index.js ▌ submit 提交到数据库的信息 customer :',this.data.customer,this.data.userInfo)
     that.setData({
       hasSubmit: true,
       toastSuccessShow:true
@@ -236,9 +252,27 @@ Page({
     this.addCustomerInfo()
 
   },
+  // 获取用户信息
+  // 同时缓存，避免重复弹窗
+  getUserProfile(e) {
+    wx.getUserProfile({
+      desc: '展示用户信息', // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
+      success: (res) => {
+        console.log('☀ index.js ▌ getUserProfile 用户信息 res:',res)
+        this.setData({
+          userInfo: res.userInfo,
+          hasUserInfo: true
+        })
+        wx.setStorage({
+          key: 'userInfo',
+          data: res.userInfo,
+        })
+       
+      }
+    })
+  },
   addCustomerInfo(){
     var that = this
-    console.log('addCustomerInfo调用[云函数')
     let time = util.formatTime(new Date)  // 获取当前最新时间,
     wx.cloud.callFunction({    //添加livingHistory表记录
       name: 'addCustomerInfo',
@@ -248,6 +282,7 @@ Page({
         customerPhone : that.data.customer.customerPhone,
         customerAddress :  that.data.customer.customerAddress,
         baby: that.data.customer.baby,
+        userInfo:that.data.userInfo,
         time: time
       },
       success: res => {
@@ -255,20 +290,19 @@ Page({
           data: that.data.customer,
           key: 'customerInfo',
         })
-          console.log('addCustomerInfo调用[云函数]成功 ', res)
+        this.onLoad()
       },
       fail: err => {
         that.setData({
           toastFailShow:true
-        })
-        console.log('addCustomerInfo云函数调用失败', err)
+        }) 
       }
     })
   },
   // 根据出生日期计算年龄周岁
   getAge(strBirthday){
-      let returnAge = ''
-      let mouthAge = ''
+      let yearAge = 0
+      let mouthAge = 0
       let strBirthdayArr = strBirthday.split("-");
       let birthYear = strBirthdayArr[0];
       let birthMonth = strBirthdayArr[1];
@@ -278,11 +312,12 @@ Page({
       let nowMonth = d.getMonth() + 1;
       let nowDay = d.getDate();
       if (nowYear == birthYear) {
-        // returnAge = 0; //同年 则为0岁
+        // yearAge = 0; //同年 则为0岁
         let monthDiff = nowMonth - birthMonth; //月之差 
         if (monthDiff < 0) {
+          return yearAge = -1; //返回-1 表示出生日期输入错误 晚于今天
         } else {
-          mouthAge = monthDiff + '个月';
+          mouthAge = monthDiff;
         }
       } else {
         let ageDiff = nowYear - birthYear; //年之差
@@ -290,29 +325,65 @@ Page({
           if (nowMonth == birthMonth) {
             let dayDiff = nowDay - birthDay; //日之差 
             if (dayDiff < 0) {
-              returnAge = ageDiff - 1 + '岁';
+              yearAge = ageDiff - 1 ;
             } else {
-              returnAge = ageDiff + '岁';
+              yearAge = ageDiff;
             }
           } else {
             let monthDiff = nowMonth - birthMonth; //月之差 
             if (monthDiff < 0) {
-              returnAge = ageDiff - 1 + '岁';
+              yearAge = ageDiff - 1;
             } else {
-              mouthAge = monthDiff + '个月';
-              returnAge = ageDiff + '岁';
+              mouthAge = monthDiff;
+              yearAge = ageDiff;
             }
           }
         } else {
-          returnAge = -1; //返回-1 表示出生日期输入错误 晚于今天
+          return yearAge = -1; //返回-1 表示出生日期输入错误 晚于今天
         }
       }
-      return returnAge + mouthAge; //返回周岁年龄+月份
+      let age = {}
+      age.yearAge= yearAge
+      age.mouthAge = mouthAge
+      return age; //返回周岁年龄+月份
   },
   // 跳转到公众号
-  addwxGroup(){
-    wx.navigateTo({
-      url: '/pages/addwxGroup/addwxGroup',
+  addwxGroup(e){
+    let index = e.currentTarget.dataset.index
+    if(this.data.customer.baby[index].age.yearAge<2){
+      wx.navigateTo({
+        url: '/pages/wxGroupOne/wxGroupOne',
+      })
+    }else if(this.data.customer.baby[index].age.yearAge<4){
+      wx.navigateTo({
+        url: '/pages/wxGroupFour/wxGroupTwo',
+      })
+    }else if(this.data.customer.baby[index].age.yearAge<6){
+      wx.navigateTo({
+        url: '/pages/wxGroupFour/wxGroupThree',
+      })
+    }else if(this.data.customer.baby[index].age.yearAge<8){
+      wx.navigateTo({
+        url: '/pages/wxGroupFour/wxGroupFour',
+      })
+    }else{
+      wx.navigateTo({
+        url: '/pages/wxGroupFour/wxGroupFive',
+      })
+    }
+  },
+  // 公众号加载成功
+  officialLoad(detail ){
+    console.log(' ☀ index.js ▌ officialLoad detail',detail.detail)
+    this.setData({
+      noGetOfficial: false
+    })
+  },
+  // 公众号加载失败
+  officialError(detail){
+    console.log(' ☀ index.js ▌ officialError detail',detail.detail)
+    this.setData({
+      noGetOfficial: true
     })
   }
 
