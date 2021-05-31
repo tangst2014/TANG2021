@@ -40,11 +40,8 @@ Page({
         
       },
       fail: err => {
-        that.userInfo.openid = -1
-        that.userInfo.unionid = -1
-        wx.setStorage({
-          key: 'userInfo',
-          data: that.userInfo,
+        wx.showToast({
+          title: '登录失败~',
         })
         console.log('☀ login.js ▌ fail userInfo :',that.userInfo)
       }

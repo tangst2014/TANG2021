@@ -1,8 +1,10 @@
+
+
+<!-- <web-view>
+<image src="../../static/1.png" style="width:100px;height:100px"/>
+</web-view> -->
 <view hidden="{{isLogin}}">
     欢迎来到小程序
-    <l-loading show="{{!isLogin}}" size="medium">
-        <view class="loading"><image class="loading-img" src="/static/loading.gif"></image></view>
-    </l-loading>
 </view>
 <view class="customerBody" hidden="{{!isLogin}}">
 <l-form name="customer" l-form-btn-class="l-form-btn-class" bind:linsubmit="submit">
@@ -39,13 +41,17 @@
 </l-form>
 </view>
 
+<!-- <l-loading show="{{isLoading}}" size="medium" class="loading">
+   <image class="loading-img" src="/static/loading.gif"></image>
+</l-loading> -->
+
 <view wx:if="{{hasSubmit}}">
     <view class="official t-margin">
         <text>1,关注公众号</text>
         <view class="t-margin">
             <official-account bindload="officialLoad" binderror="officialError"></official-account>
             <view wx:if="{{noGetOfficial}}">
-                <view class="tips">公众号只有从特定的接口才能显示，不显示放公众号文章</view>
+                <view bindtap="onOfficialArticle">播控小剧场</view>
             </view>
         </view>
     </view>
@@ -119,6 +125,5 @@ title="保存失败，请检查信息~"
 </l-form>
 <view class="t-center tips t-margin t-font" bindtap="onBabyInfoBack">{{hasSubmit?'返回':'点错，不填了'}}</view>
 </view>
-
 
 

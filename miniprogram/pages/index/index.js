@@ -62,6 +62,7 @@ Page({
     hasSubmit: false, //输入框禁用
     hasUserInfo: false ,   // 是否获取用户信息
     noGetOfficial: false , // 关注公众号是否加载失败
+    isLoading: false // 加载动画
 
   },
   onLoad: function() {
@@ -79,54 +80,66 @@ Page({
       return
     }
 
-    if(!app.customer.baby.length){
-      // 2，没有本地信息，则根据openid查询数据库，若数据库没有数据，是新用户
-      wx.navigateTo({
-        url: '/pages/login/login',
-      })
-      return
-
-    }else{ 
-      // 有本地信息,计算年龄
-      let age = 0
-      for(var i=0;i<app.customer.baby.length;i++){
-        age = this.getAge(app.customer.baby[i].babyBirthday)
-        app.customer.baby[i].age = age
-      }
+    if(app.customer.baby.length){
+       // 有本地信息,计算年龄
+       let age = 0
+       for(var i=0;i<app.customer.baby.length;i++){
+         age = this.getAge(app.customer.baby[i].babyBirthday)
+         app.customer.baby[i].age = age
+       }
+       that.setData({
+         customer: app.customer,
+         isLogin:true,
+         hasSubmit: true
+       })
+    }else{
       that.setData({
-        customer: app.customer,
-        isLogin:true,
-        hasSubmit: true
+        hasSubmit: false,
       })
-    }   
+      that.getCustomer()
+    }
 
   },
   onShow(options){
     this.setData({isLogin: app.isLogin})
     console.log('☀ index.js ▌ onShow ☞  option',options)
   },
-  // 根据OPEDNID，查询数据库
-  // 访问云数据库用户信息  
-  getCustomerInfoFun(){
-    var that = this;
-    wx.cloud.callFunction({    //添加livingHistory表记录
-      name: 'login',
-      success: res => {
-        // 存储openid，unionid，userinfo等用户信息
-        let openid = res.result.openid
-        if(openid){
-          
-       }
-      },
-      fail: err => {
-        console.log('☀ index.js ▌ getCustomerInfoFun 查询openid失败   ☞  ', err)
-      }
-    })
-  },
+  
   // 点击日历
   bindDateChange: function(e) {
     this.setData({
       'tempBaby.babyBirthday': e.detail.value
+    })
+  },
+  // 获取用户信息
+  getCustomer(){
+    var that = this
+    getCustomerInfo.where({
+      openid: app.userInfo.openid
+    })
+    .get({
+      success: res => {
+        console.log('☀ index.js ▌ getCustomer 查询用户信息 : ', res.data[0])
+        if(res.data.length){
+          app.customer = res.data[0]
+          that.setData({
+            customer:app.customer,
+            hasSubmit: true,
+          })
+          wx.setStorage({
+            data: res.data[0],
+            key: 'customer',
+          })
+        }else{
+          that.setData({
+            hasSubmit: false,
+          })
+        }
+      },
+      fail: err => {
+        console.log('☀ index.js ▌ getCustomerInfoFun 查询用户数据失败   ☞  ',err)
+      }
+
     })
   },
   // 添加宝宝信息
@@ -241,10 +254,6 @@ Page({
           that.data.customer.openid =  app.userInfo.openid
           that.data.customer.userInfo =  app.userInfo.userInfo
           console.log('☀ index.js ▌ submit 提交到数据库的信息 customer :',that.data.customer,that.data.userInfo)
-          that.setData({
-            hasSubmit: true,
-            toastSuccessShow:true
-          })
           that.addCustomerInfo()
         } else {
           return
@@ -268,6 +277,10 @@ Page({
         time: time
       },
       success: res => {
+        that.setData({
+          hasSubmit: true,
+          toastSuccessShow:true
+        })
         wx.setStorage({
           data: that.data.customer,
           key: 'customer',
@@ -345,7 +358,7 @@ Page({
       })
     }else if(this.data.customer.baby[index].age.yearAge<8){
       wx.navigateTo({
-        url: '/pages/wxGroupFour/wxGroupFour',
+        url: '/pages/wxGroupFive/wxGroupFive',
       })
     }else{
       wx.navigateTo({
@@ -365,6 +378,12 @@ Page({
     console.log('☀ index.js ▌ officialError detail',detail.detail)
     this.setData({
       noGetOfficial: true
+    })
+  },
+  // 跳转公众号文章
+  onOfficialArticle(){
+    wx.navigateTo({
+      url: '/pages/wxGroupFour/wxGroupFour',
     })
   }
 
