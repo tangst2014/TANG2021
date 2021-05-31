@@ -1,4 +1,10 @@
-<view class="customerBody">
+<view hidden="{{isLogin}}">
+    欢迎来到小程序
+    <l-loading show="{{!isLogin}}" size="medium">
+        <view class="loading"><image class="loading-img" src="/static/loading.gif"></image></view>
+    </l-loading>
+</view>
+<view class="customerBody" hidden="{{!isLogin}}">
 <l-form name="customer" l-form-btn-class="l-form-btn-class" bind:linsubmit="submit">
     <l-form-item label="姓名:" name="customerName" rules="{{nameRules}}">
         <l-input id="customerName" value="{{customer.customerName}}" placeholder="名字不要超过10个字" hide-label show-row="{{false}}" disabled="{{hasSubmit}}"/>
@@ -10,7 +16,7 @@
         <l-input id="customerAddress" value="{{customer.customerAddress}}" hide-label show-row="{{false}}" disabled="{{hasSubmit}}"/>
     </l-form-item>
     <view class="baby" hover-class="none" hover-stop-propagation="false">
-        <view wx:if="{{!hasSubmit}}" class="tips t-flex" bindtap="addBabyInfo">宝宝信息：<l-icon name="add"/>点我，添加</view>
+        <view wx:if="{{!hasSubmit}}" class="tips t-flex" bindtap="addBabyInfo">宝宝：<l-icon name="add"/>点我，添加</view>
         <view wx:else class="tips t-flex" bindtap="addBabyInfo">宝宝信息：</view>
         <block wx:for="{{customer.baby}}" wx:key="index" wx:for-item='baby'>
         <view class="babyShow">
@@ -33,37 +39,39 @@
 </l-form>
 </view>
 
-<view class="official" style="margin-top:20px">
-    <text>关注公众号</text>
-    <official-account bindload="officialLoad" binderror="officialError"></official-account>
-    <view wx:if="{{noGetOfficial}}">
-        <view class="tips">公众号只有从特定的接口才能显示，不显示放公众号文章</view>
-    </view>
-</view>
-
-<view class="babyAddwxGroup">
-    <text>关注微信群</text>
-    <view wx:for="{{customer.baby}}" wx:key="index" wx:for-item='baby' class="tips">
-        <block wx:if="{{baby.age.yearAge!=0}}">
-            <text>宝宝{{baby.babyName}}，现在{{baby.age.yearAge}}岁{{baby.age.mouthAge}}个月，建议加入下面群</text>
-        </block>
-        <block wx:else>
-            <text>宝宝{{baby.babyName}}，现在{{baby.age.mouthAge}}个月，建议加入下面群</text>
-        </block>
-        <view bindtap="addwxGroup" data-index="{{index}}">
-            <view class="t-margin">点我了解详情</view>
+<view wx:if="{{hasSubmit}}">
+    <view class="official t-margin">
+        <text>1,关注公众号</text>
+        <view class="t-margin">
+            <official-account bindload="officialLoad" binderror="officialError"></official-account>
+            <view wx:if="{{noGetOfficial}}">
+                <view class="tips">公众号只有从特定的接口才能显示，不显示放公众号文章</view>
+            </view>
         </view>
     </view>
 
+    <view class="babyAddwxGroup">
+        <text>2,关注微信群</text>
+        <view wx:for="{{customer.baby}}" wx:key="index" wx:for-item='baby' class="tips t-margin">
+            <block wx:if="{{baby.age.yearAge!=0}}">
+                <text>宝宝{{baby.babyName}}，现在{{baby.age.yearAge}}岁{{baby.age.mouthAge}}个月，建议加入下面群</text>
+            </block>
+            <block wx:else>
+                <text>宝宝{{baby.babyName}}，现在{{baby.age.mouthAge}}个月，建议加入下面群</text>
+            </block>
+            <view bindtap="addwxGroup" data-index="{{index}}">
+                <view class="t-margin">点我了解详情</view>
+            </view>
+        </view>
+
+    </view>
 </view>
-
-
 
 <l-mask show="{{maskShow}}" locked="{{true}}"> </l-mask>
 <l-toast
 show="{{toastShow}}"
 icon="error "
-title="请填写宝宝信息~"
+title="请正确填写宝宝信息~"
 />
 <l-toast
 show="{{toastSuccessShow}}"

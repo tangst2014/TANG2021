@@ -13,7 +13,24 @@ App({
         traceUser: true,
       })
     }
-
-    this.globalData = {}
+    // 用户信息
+    var customer = wx.getStorageSync('customer')
+    if(customer){
+      this.globalData.customer = customer
+    }
+     // 用户登录信息
+     var userInfo = wx.getStorageSync('userInfo')
+     if(userInfo){
+       this.globalData.userInfo = userInfo
+       this.globalData.isLogin = true
+     }
+   
+  },
+  globalData : {
+    customer : {
+      baby:[]
+    }, // 用户信息
+    userInfo: {}, // 用户登录信息
+    isLogin: false // 是否登录
   }
 })

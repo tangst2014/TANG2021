@@ -81,3 +81,14 @@
     margin: 20rpx 30rpx 50rpx 30rpx;
 
 }
+.loading{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30%;
+}
+.loading .loading-img{
+
+    width: 50px;
+    height: 50px;
+}

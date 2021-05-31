@@ -10,11 +10,12 @@ const _ = db.command
 exports.main = async (event, context) => {
   return await db.collection(event.table).add({
     data: {
+      openid: event.openid,
+      userInfo: event.userInfo,
       customerName: event.customerName,
       customerPhone: event.customerPhone,
       customerAddress: event.customerAddress,
       baby: event.baby,
-      userInfo: event.userInfo,
       time: event.time,
     },
     success: function (res) {
