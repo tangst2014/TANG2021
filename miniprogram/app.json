@@ -1,12 +1,12 @@
 {
   "pages": [
     "pages/index/index",
-    "pages/login/login",
     "pages/wxGroupOne/wxGroupOne",
     "pages/wxGroupFour/wxGroupFour",
     "pages/wxGroupFive/wxGroupFive",
     "pages/wxGroupThree/wxGroupThree",
-    "pages/wxGroupTwo/wxGroupTwo"
+    "pages/wxGroupTwo/wxGroupTwo",
+    "pages/forms/forms"
   ],
   "window": {
     "backgroundColor": "#F6F6F6",

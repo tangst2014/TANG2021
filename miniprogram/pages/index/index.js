@@ -1,8 +1,3 @@
-// 本地缓存userinfo,customer，userinfo为登录信息；customer为用户信息（包括userinfo）
-// 1，addCustomerInfo添加到数据库时候会缓存；2，getCustomerInfoFun从数据库读取数据的时候会缓存
-// 用户信息包括openid（用于查询）、微信名称等信息，用户手机、名字及宝宝信息，宝宝信息（必填）
-// 采用LinUI库，form 表单验证也采用LinUI表单验证，需要初始化wx.lin.initValidateForm(this)
-// 跳转到登录页；1，没有userInfo即跳转，包括了用户删除又重登录，第一次登录的情况，信息查询放到登录页
 const app = getApp().globalData
 import util from "../../utils/util.js";
 //云数据库初始化
@@ -10,15 +5,11 @@ const db = wx.cloud.database({});
 const getCustomerInfo = db.collection('customerInfo');
 Page({
   data: {
-    isLogin:false, // 未登录
+    motto: '登记',
     customer: 
     {  
-      //顾客信息
-      userInfo: {}, // 微信等信息
       openid: '',
       customerName: '',
-      customerPhone: '',
-      customerAddress: '',
       // 宝宝信息
       baby:
       [
@@ -31,57 +22,23 @@ Page({
        // }
       ] 
     },
-    isShowBabyInfo: false, // 是否添加宝宝信息
-    isAddBaby: true, // 防止添加宝宝数量的时候重复触发函数
-    // 表单验证
-    telphoneRules:{
-      required: true,
-      message: '请填写正确手机号码',
-      pattern: '^[1][3-9]{1}[0-9]{9}$',
-      trigger: 'blur',
-    },
-    nameRules:[
-      {type: 'string',required: true,message: '必选项不能为空',trigger: 'blur'},
-      { min: 1, max: 5, message: '名字长度在1-10个字符之间', trigger: 'change' }
-    ],
-    regionRules:[
-      {type: 'string',required: true,message: '必选项不能为空',trigger: 'blur'},
-      { min: 1, max: 5, message: '宝宝区域长度在1-5个字符之间', trigger: 'change' }
-    ],
-    addressRules:[
-      {type: 'string',required: true,message: '必选项不能为空',trigger: 'blur'},
-      { min: 1, max: 30, message: '地址长度在1-50个字符之间', trigger: 'change' }
-    ],
-    tempBaby: {}, // 临时存储1个宝宝信息
-    tempIndex: '', // 临时存储序号
-    isAddorEdit: true, // 判断是添加信息还是修改，true为添加信息,false为修改
-    toastShow: false, // 提示框
-    toastSuccessShow: false, // 成功提示
-    toastFailShow: false, // 失败提示
-    maskShow: false, // 遮罩层
-    hasSubmit: false, //输入框禁用
-    hasUserInfo: false ,   // 是否获取用户信息
+    show: false,
+    isAddCustomeInfo: false,   // 是否填写信息，有用户信息不填写，
     noGetOfficial: false , // 关注公众号是否加载失败
-    isLoading: false // 加载动画
-
   },
   onLoad: function() {
-    // 使用linUI的 form 组件时需要在 onLoad 中调用 wx.lin.initValidateForm(this)进行初始化。
-    wx.lin.initValidateForm(this)
-
+ 
     let that = this 
-  
-    // 1，查询本地用户信息（有本地信息，则一定登录过，不需要验证登录）
-    console.log('app.customer:',app.customer)
-    if(app.userInfo == undefined||JSON.stringify(app.userInfo) == "{}"){
-      wx.navigateTo({
-        url: '/pages/login/login',
+    if(app.editCount<1){
+      wx.showToast({
+        title: '请勿恶意提交',
       })
-      return
+      app.editCount = 3
     }
-
+    console.log('☀ index.js ▌ onLoad app.customer : ', app.customer)
+    // 1，查询本地用户信息
     if(app.customer.baby.length){
-       // 有本地信息,计算年龄
+       // 计算年龄
        let age = 0
        for(var i=0;i<app.customer.baby.length;i++){
          age = this.getAge(app.customer.baby[i].babyBirthday)
@@ -89,209 +46,133 @@ Page({
        }
        that.setData({
          customer: app.customer,
-         isLogin:true,
-         hasSubmit: true
+         hasSubmit: true,
+         motto: '修改',
        })
+       // 后台重新刷新本地缓存
+      this.getCustomerDataNoOpenid()
     }else{
-      that.setData({
-        hasSubmit: false,
-      })
-      that.getCustomer()
+      // 2，没有本地信息
+      // 查询数据库，有openid,直接查询；没有openid,先获取opendi
+      // 
+      if(app.userInfo == undefined||JSON.stringify(app.userInfo) == "{}"){
+        // app.userInfo.openid为空或undefined
+        that.getCustomerDataNoOpenid()
+      }else{
+        // 登陆过
+        that.getCustomerData(app.userInfo)
+      }
+      
     }
 
   },
-  onShow(options){
-    this.setData({isLogin: app.isLogin})
-    console.log('☀ index.js ▌ onShow ☞  option',options)
-  },
-  
-  // 点击日历
-  bindDateChange: function(e) {
-    this.setData({
-      'tempBaby.babyBirthday': e.detail.value
-    })
-  },
   // 获取用户信息
-  getCustomer(){
+  getCustomerData(openid){
     var that = this
     getCustomerInfo.where({
-      openid: app.userInfo.openid
+      openid: openid
     })
     .get({
       success: res => {
-        console.log('☀ index.js ▌ getCustomer 查询用户信息 : ', res.data[0])
+        console.log('☀ index.js ▌ getCustomerData 查询用户信息 : ', res.data)
+        that.data.isGetCustomer = true // 成功查询过
         if(res.data.length){
           app.customer = res.data[0]
+          // 计算年龄
+          let age = 0
+          for(var i=0;i<app.customer.baby.length;i++){
+            age = this.getAge(app.customer.baby[i].babyBirthday)
+            app.customer.baby[i].age = age
+          }
           that.setData({
             customer:app.customer,
             hasSubmit: true,
+            motto: '修改'
           })
           wx.setStorage({
             data: res.data[0],
             key: 'customer',
           })
         }else{
+          // 没有查询到数据
+          app.customer = {
+            baby:[]
+          } // 用户信息
           that.setData({
+            customer:app.customer,
             hasSubmit: false,
+            motto: '登记'
+          })
+          wx.setStorage({
+            data: app.customer,
+            key: 'customer',
           })
         }
       },
       fail: err => {
-        console.log('☀ index.js ▌ getCustomerInfoFun 查询用户数据失败   ☞  ',err)
+        console.log('☀ index.js onload ▌ getCustomerInfoFun 查询用户数据失败   ☞  ',err)
       }
 
     })
   },
-  // 添加宝宝信息
-  // maskShow控制遮罩层显示与隐藏，true为显示，同时设置了locked状态为true，即点击背景的时候不关闭
-  // isShowBabyInfo为添加宝宝信息弹出层，true为显示
-  // isAddorEdit判断是添加信息还是修改，true为添加信息,false为修改
-  addBabyInfo(e){
-    this.data.isAddorEdit = true
-    this.setData({
-      isShowBabyInfo: true,
-      maskShow: true,
-      tempBaby:{}
-    })
-  },
-   // 点击宝宝名字，修改相关信息
-   // isAddorEdit判断是添加信息还是修改，true为添加信息,false为修改
-   onEditBabyInfo(e){
-    this.data.isAddorEdit = false
-    this.data.tempIndex = e.currentTarget.dataset.index
-    let tempBaby = this.data.customer.baby[this.data.tempIndex]
-    this.setData({
-      isShowBabyInfo:true,
-      maskShow:true,
-      tempBaby
-    })
-  },
-   // 删除宝宝信息,如果数据库已经有数据，会禁用删除
-   deleteBabyInfo(e){
-    if(this.data.hasSubmit){
-      return
-    }
-    // 没有宝宝信息，不做删除
-    let index = e.currentTarget.dataset.index
-    if(!this.data.customer.baby.length){
-      return
-    }
-    this.data.customer.baby.splice(index, 1)
-    this.setData({
-     ['customer.baby']:this.data.customer.baby,
-   })
-
-  },
-  // 宝宝信息保存
-  saveBabyInfo(event){
-    const {detail} = event;
-    // 若表单验证不正确，则返回
-    if(!detail.isValidate){  
-      return
-    }
-    if( this.data.isAddorEdit){
-      // 添加宝宝信息
-      // 如果宝宝保存超过5个，则返回
-      if(this.data.customer.baby.length>4){
-        this.setData({
-          isShowBabyInfo:false,
-          maskShow:false
-        })
-        return
-      }
-      let {babyName,babySex,babyBirthday,babyRegion} = detail.values
-      this.data.customer.baby.push({babyName,babySex,babyBirthday,babyRegion})
-    }else{
-      // 修改宝宝信息
-      this.data.customer.baby[this.data.tempIndex] = detail.values
-
-    }
-    this.setData({
-      isShowBabyInfo:false,
-      maskShow:false,   
-      ['customer.baby']:this.data.customer.baby
-    })
-  
-    console.log('☀ index.js ▌ saveBabyInfo ☞  宝宝的信息 baby:',this.data.customer.baby)
-  },
- 
-  // 返回主界面
-  onBabyInfoBack(){
-    this.setData({
-      isShowBabyInfo:false,
-      maskShow:false 
-    })
-  },
-
-  // 表单提交
-  submit(event){
-    // 已经弹窗获取用户信息，不在弹出
-    const {detail} = event;
-    var that = this;
-    // 当isValidate为false时，表单数据校验不正确提示
-    if(!detail.isValidate){
-      that.setData({
-        toastFailShow:true
-      })
-      return
-    }
-    // 没有填写宝宝信息提示
-    if(!that.data.customer.baby.length){
-      that.setData({
-        toastShow:true
-      })
-      return
-    }
-    // 确认框
-    wx.showModal({
-      title: '确认提交',
-      content: '提交之后不能再修改！',
-      success: function (res) {
-        if (res.confirm) {
-          that.data.customer.customerName =  detail.values.customerName
-          that.data.customer.customerPhone = detail.values.customerPhone
-          that.data.customer.customerAddress =  detail.values.customerAddress
-          that.data.customer.openid =  app.userInfo.openid
-          that.data.customer.userInfo =  app.userInfo.userInfo
-          console.log('☀ index.js ▌ submit 提交到数据库的信息 customer :',that.data.customer,that.data.userInfo)
-          that.addCustomerInfo()
-        } else {
-          return
-        }
-      }
-    })
-  },
-  addCustomerInfo(){
+  // 获取用户OPENID，unionid
+  getCustomerDataNoOpenid(){
     var that = this
-    let time = util.formatTime(new Date)  // 获取当前最新时间,
     wx.cloud.callFunction({    //添加livingHistory表记录
-      name: 'addCustomerInfo',
-      data: {
-        table: 'customerInfo',
-        openid: that.data.customer.openid,
-        userInfo: that.data.customer.userInfo,
-        customerName :  that.data.customer.customerName,
-        customerPhone : that.data.customer.customerPhone,
-        customerAddress :  that.data.customer.customerAddress,
-        baby: that.data.customer.baby,
-        time: time
-      },
+      name: 'login',
       success: res => {
-        that.setData({
-          hasSubmit: true,
-          toastSuccessShow:true
-        })
-        wx.setStorage({
-          data: that.data.customer,
-          key: 'customer',
-        })
+        // 存储openid，unionid，userinfo等用户信息
+        console.log(res.result) 
+        app.userInfo.openid = res.result.openid
+        app.userInfo.unionid = res.result.unionid
+        this.getCustomerData(app.userInfo.openid)
       },
       fail: err => {
-        that.setData({
-          toastFailShow:true
-        }) 
+        console.log('☀ login.js ▌ fail userInfo :', err)
       }
     })
+  },
+ 
+  // 弹出获取用户信息同意框
+  onAddCustomeInfo(e) {
+    var　that = this 
+    that.setData({show:true})
+    setTimeout(function () {
+      that.setData({
+        show: false
+      })
+    }, 2000)
+  
+    //app.userInfo.userInfo包括头像，微信名等信息
+    if(app.userInfo.userInfo == undefined||JSON.stringify(app.userInfo.userInfo) == "{}"){
+      // 获取用户信息，开发者每次通过该接口获取用户个人信息均需用户确认，开发者妥善保管用户快速填写的头像昵称，避免重复弹窗
+      wx.getUserProfile({
+        desc: '用户信息', // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
+        success: (res) => {
+          console.log('getUserProfile', res.userInfo)
+          app.userInfo.userInfo = res.userInfo
+          wx.setStorage({
+            key: 'userInfo',
+            data: app.userInfo,
+          })
+          that.setData({
+            userInfo: res.userInfo,
+            hasUserInfo: true,
+          })
+          wx.navigateTo({
+            url: '/pages/forms/forms',
+          })
+        },
+        fail:(err) => {
+          that.setData({show:false})
+        }
+      })
+    }else{
+      wx.navigateTo({
+        url: '/pages/forms/forms',
+      })
+    }
+    
   },
   // 根据出生日期计算年龄周岁
   getAge(strBirthday){
@@ -386,5 +267,5 @@ Page({
       url: '/pages/wxGroupFour/wxGroupFour',
     })
   }
-
+ 
 })

@@ -1,0 +1,99 @@
+
+
+<!-- <web-view>
+<image src="../../static/1.png" style="width:100px;height:100px"/>
+</web-view> -->
+<view class="loading" wx:if="{{show}}">
+    <image class="loading-img" src="/static/loading.gif"></image>
+</view>
+<view class="customerBody" wx:else>
+<l-form name="customer" l-form-btn-class="l-form-btn-class" bind:linsubmit="submit">
+    <l-form-item label="姓名:" name="customerName" rules="{{nameRules}}">
+        <l-input id="customerName" value="{{customer.customerName}}" hide-label show-row="{{false}}"/>
+    </l-form-item>
+    <l-form-item label="手机:" name="customerPhone" rules="{{telphoneRules}}">
+        <l-input id="customerPhone" value="{{customer.customerPhone}}" hide-label show-row="{{false}}"/>
+    </l-form-item>
+    <l-form-item label="地址:" name="customerAddress" rules="{{addressRules}}">
+        <l-input id="customerAddress" value="{{customer.customerAddress}}" hide-label show-row="{{false}}" />
+    </l-form-item>
+    <view class="baby" hover-class="none" hover-stop-propagation="false">
+        <view wx:if="{{!hasSubmit}}" class="tips t-flex" bindtap="addBabyInfo">宝宝：<l-icon name="add"/>点我，添加</view>
+        <view wx:else class="tips t-flex" bindtap="addBabyInfo">宝宝信息：</view>
+        <block wx:for="{{customer.baby}}" wx:key="index" wx:for-item='baby'>
+        <view class="babyShow">
+            <view class="babyName">
+                <view class="edit" catchtap="onEditBabyInfo" data-index = "{{index}}" >{{baby.babyName}}</view>
+                <view wx:if="{{!hasSubmit}}" catchtap="deleteBabyInfo" data-index = "{{index}}"><l-icon name="delete" /></view>
+            </view>
+        </view>
+        </block> 
+    </view>
+    <view slot="submit">
+        <l-button>提交</l-button>
+    </view>
+    <view slot="reset">
+        <l-button type="default" plain>重置</l-button>
+    </view>
+</l-form>
+</view>
+
+
+<l-mask show="{{maskShow}}" locked="{{true}}"> 
+<view class='content mask-content1' hidden="{{!toastShow}}">
+      必选项为必填~
+</view>
+</l-mask>
+<l-toast
+show="{{toastShow}}"
+icon="error "
+title="请正确填写宝宝信息~"
+/>
+<l-toast
+show="{{toastSuccessShow}}"
+icon="success"
+title="保存成功~"
+/>
+<l-toast
+show="{{toastFailShow}}"
+icon="error"
+title="保存失败，请检查信息~"
+/>
+
+<view class="babyBody" wx:if="{{isShowBabyInfo}}">
+<view class="tips t-center">宝宝信息</view>
+<l-form name="babyInfo" l-form-btn-class="l-form-btn-class" bind:linsubmit="saveBabyInfo">
+    <view class="babyInfo" hover-class="none" hover-stop-propagation="false">
+        <l-form-item label="宝宝姓名:  " name="babyName" rules="{{nameRules}}">
+            <l-input id="babyName" value="{{tempBaby.babyName}}" hide-label show-row="{{false}}"/>
+        </l-form-item>
+        <l-form-item label="宝宝性别:  " name="babySex"  rules="{{noEmptyRules}}">
+            <l-radio-group id="babySex" placement="row" class="l-class" current = "{{tempBaby.babySex}}">
+                <l-radio key="0">男</l-radio>
+                <l-radio key="1">女</l-radio>
+            </l-radio-group>
+        </l-form-item>
+        <view class="section">
+            <picker mode="date" value="{{tempBaby.babyBirthday}}" start="2000-01-01" end="2099-01-01" bindchange="bindDateChange">
+                 <l-form-item label="宝宝出生:  " name="babyBirthday" rules="{{noEmptyRules}}">
+                    <view hidden="{{true}}"><l-input id="babyBirthday" value="{{tempBaby.babyBirthday}}" hide-label show-row="{{false}}" /></view>
+                     <view class="picker">{{tempBaby.babyBirthday}}</view>
+                </l-form-item>
+            </picker>
+         </view>
+       
+        <l-form-item label="宝宝所在区域:  " name="babyRegion" rules="{{regionRules}}">
+            <l-input id="babyRegion" value="{{tempBaby.babyRegion}}" hide-label show-row="{{false}}" />
+        </l-form-item>
+    </view>
+    <view slot="submit">
+        <l-button>保存</l-button>
+    </view>
+    <view slot="reset">
+        <l-button type="default" plain >重置</l-button>
+    </view>
+</l-form>
+<view class="t-center tips t-margin t-font" bindtap="onBabyInfoBack">{{hasSubmit?'返回':'点错，不填了'}}</view>
+</view>
+
+

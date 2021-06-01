@@ -1,129 +1,39 @@
-
-
-<!-- <web-view>
-<image src="../../static/1.png" style="width:100px;height:100px"/>
-</web-view> -->
-<view hidden="{{isLogin}}">
-    欢迎来到小程序
-</view>
-<view class="customerBody" hidden="{{!isLogin}}">
-<l-form name="customer" l-form-btn-class="l-form-btn-class" bind:linsubmit="submit">
-    <l-form-item label="姓名:" name="customerName" rules="{{nameRules}}">
-        <l-input id="customerName" value="{{customer.customerName}}" placeholder="名字不要超过10个字" hide-label show-row="{{false}}" disabled="{{hasSubmit}}"/>
-    </l-form-item>
-    <l-form-item label="手机:" name="customerPhone" rules="{{telphoneRules}}">
-        <l-input id="customerPhone" value="{{customer.customerPhone}}" hide-label show-row="{{false}}" disabled="{{hasSubmit}}"/>
-    </l-form-item>
-    <l-form-item label="地址:" name="customerAddress" rules="{{addressRules}}">
-        <l-input id="customerAddress" value="{{customer.customerAddress}}" hide-label show-row="{{false}}" disabled="{{hasSubmit}}"/>
-    </l-form-item>
-    <view class="baby" hover-class="none" hover-stop-propagation="false">
-        <view wx:if="{{!hasSubmit}}" class="tips t-flex" bindtap="addBabyInfo">宝宝：<l-icon name="add"/>点我，添加</view>
-        <view wx:else class="tips t-flex" bindtap="addBabyInfo">宝宝信息：</view>
-        <block wx:for="{{customer.baby}}" wx:key="index" wx:for-item='baby'>
-        <view class="babyShow">
-            <view class="babyName">
-                <view class="edit" catchtap="onEditBabyInfo" data-index = "{{index}}" >{{baby.babyName}}</view>
-                <view wx:if="{{!hasSubmit}}" catchtap="deleteBabyInfo" data-index = "{{index}}"><l-icon name="delete" /></view>
-            </view>
-        </view>
-        </block>
-        
+<!-- <view class="loading" wx:if="{{show}}">
+    <image class="loading-img" src="/static/loading.gif"></image>
+</view> -->
+<l-mask show="{{show}}"> </l-mask>
+<view class="container">
+    <view class="customer">
+        <view class="customerName">{{customer.customerName}}</view>
+        <view class="addCustomeInfo"><l-button bindtap="onAddCustomeInfo" type="success">{{motto}}</l-button></view>
     </view>
-    
-    
-    <view slot="submit" hidden="{{hasSubmit}}">
-        <l-button>提交</l-button>
-    </view>
-    <view slot="reset" hidden="{{hasSubmit}}">
-        <l-button type="default" plain>重置</l-button>
-    </view>
-</l-form>
-</view>
-
-<!-- <l-loading show="{{isLoading}}" size="medium" class="loading">
-   <image class="loading-img" src="/static/loading.gif"></image>
-</l-loading> -->
-
-<view wx:if="{{hasSubmit}}">
-    <view class="official t-margin">
-        <text>1,关注公众号</text>
-        <view class="t-margin">
-            <official-account bindload="officialLoad" binderror="officialError"></official-account>
-            <view wx:if="{{noGetOfficial}}">
-                <view bindtap="onOfficialArticle">播控小剧场</view>
-            </view>
-        </view>
-    </view>
-
-    <view class="babyAddwxGroup">
-        <text>2,关注微信群</text>
-        <view wx:for="{{customer.baby}}" wx:key="index" wx:for-item='baby' class="tips t-margin">
-            <block wx:if="{{baby.age.yearAge!=0}}">
-                <text>宝宝{{baby.babyName}}，现在{{baby.age.yearAge}}岁{{baby.age.mouthAge}}个月，建议加入下面群</text>
-            </block>
-            <block wx:else>
-                <text>宝宝{{baby.babyName}}，现在{{baby.age.mouthAge}}个月，建议加入下面群</text>
-            </block>
-            <view bindtap="addwxGroup" data-index="{{index}}">
-                <view class="t-margin">点我了解详情</view>
+    <view wx:if="{{hasSubmit}}">
+        <view class="official t-margin">
+            <text>1,关注公众号</text>
+            <view class="t-margin">
+                <official-account bindload="officialLoad" binderror="officialError"></official-account>
+                <view wx:if="{{noGetOfficial}}">
+                    <view bindtap="onOfficialArticle">播控小剧场</view>
+                </view>
             </view>
         </view>
 
-    </view>
-</view>
+        <view class="babyAddwxGroup">
+            <text>2,关注微信群</text>
+            <view wx:for="{{customer.baby}}" wx:key="index" wx:for-item='baby' class="tips t-margin">
+                <block wx:if="{{baby.age.yearAge!=0}}">
+                    <text>宝宝{{baby.babyName}}，现在{{baby.age.yearAge}}岁{{baby.age.mouthAge}}个月，建议加入下面群</text>
+                </block>
+                <block wx:else>
+                    <text>宝宝{{baby.babyName}}，现在{{baby.age.mouthAge}}个月，建议加入下面群</text>
+                </block>
+                <view bindtap="addwxGroup" data-index="{{index}}">
+                    <view class="t-margin">点我了解详情</view>
+                </view>
+            </view>
 
-<l-mask show="{{maskShow}}" locked="{{true}}"> </l-mask>
-<l-toast
-show="{{toastShow}}"
-icon="error "
-title="请正确填写宝宝信息~"
-/>
-<l-toast
-show="{{toastSuccessShow}}"
-icon="success"
-title="保存成功~"
-/>
-<l-toast
-show="{{toastFailShow}}"
-icon="error"
-title="保存失败，请检查信息~"
-/>
-
-<view class="babyBody" wx:if="{{isShowBabyInfo}}">
-<view class="tips t-center">宝宝信息</view>
-<l-form name="babyInfo" l-form-btn-class="l-form-btn-class" bind:linsubmit="saveBabyInfo">
-    <view class="babyInfo" hover-class="none" hover-stop-propagation="false">
-        <l-form-item label="宝宝姓名:  " name="babyName" rules="{{nameRules}}">
-            <l-input id="babyName" value="{{tempBaby.babyName}}" hide-label show-row="{{false}}" disabled="{{hasSubmit}}"/>
-        </l-form-item>
-        <l-form-item label="宝宝性别:  " name="babySex">
-            <l-radio-group id="babySex" placement="row" class="l-class" current = "{{tempBaby.babySex}}">
-                <l-radio key="0"  disabled="{{hasSubmit}}">男</l-radio>
-                <l-radio key="1"  disabled="{{hasSubmit}}">女</l-radio>
-            </l-radio-group>
-        </l-form-item>
-        <view class="section">
-            <picker mode="date" value="{{tempBaby.babyBirthday}}" start="2000-01-01" end="2099-01-01" bindchange="bindDateChange" disabled="{{hasSubmit}}">
-                 <l-form-item label="宝宝出生:  " name="babyBirthday">
-                    <view hidden="{{true}}"><l-input id="babyBirthday" value="{{tempBaby.babyBirthday}}" hide-label show-row="{{false}}" /></view>
-                     <view class="picker">{{tempBaby.babyBirthday}}</view>
-                </l-form-item>
-            </picker>
-         </view>
-       
-        <l-form-item label="宝宝所在区域:  " name="babyRegion" rules="{{regionRules}}">
-            <l-input id="babyRegion" value="{{tempBaby.babyRegion}}" hide-label show-row="{{false}}" disabled="{{hasSubmit}}"/>
-        </l-form-item>
+        </view>
     </view>
-    <view slot="submit" hidden="{{hasSubmit}}">
-        <l-button>保存</l-button>
-    </view>
-    <view slot="reset" hidden="{{hasSubmit}}">
-        <l-button type="default" plain disabled="{{hasSubmit}}">重置</l-button>
-    </view>
-</l-form>
-<view class="t-center tips t-margin t-font" bindtap="onBabyInfoBack">{{hasSubmit?'返回':'点错，不填了'}}</view>
 </view>
 
 
