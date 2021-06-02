@@ -1,8 +1,118 @@
 <!-- <view class="loading" wx:if="{{show}}">
     <image class="loading-img" src="/static/loading.gif"></image>
 </view> -->
-<l-mask show="{{show}}"> </l-mask>
 <view class="container">
+  <view class="page-body">
+      <swiper indicator-dots="{{indicatorDots}}" current="{{currentTab}}"
+        autoplay="{{autoplay}}" interval="{{interval}}" duration="{{duration}}" style="height:{{rpxHeight}}rpx">
+          <swiper-item>
+            <view class="swiper-item">
+               <view class="wxtap">
+                <view catchtap="onSwiper">戳我进群：大师</view>
+                <view class="w-margin">满减，优惠享不停</view>
+               </view>
+               <view class="wxtip">
+                一起践行阅读推广，亲子阅读路上有路上有享读保障~
+               </view>
+            </view>
+
+          </swiper-item>
+          <swiper-item wx:if = "{{swiper.name}}">
+            <form name="customer" catchsubmit="submitName">
+                <view class="swiper-item">
+                    <view>先报上你的大名</view>
+                    <view class="l-input-name">
+                        <l-input name="customerName" value="{{customer.customerName}}" width="500" hide-label show-row="{{false}}"/>
+                        <view class="name-tips">妈/爸</view>
+                    </view>
+                    <view class="w-color w-margin">例子：小明妈/爸</view>
+                </view>
+                <view class="button-class">
+                    <view class="l-button-class">
+                        <button formType="submit">{{btnSwiper}}</button>
+                    </view>
+                </view>
+            </form>
+          </swiper-item>
+          <swiper-item  wx:if = "{{swiper.age}}">
+            <form name="customer"  catchsubmit="submitBabyInfo">
+                <view class="swiper-item">
+                    <view class="baby-title">吞金兽出生年月</view>
+                     星：<l-input name="babyName" value="{{name}}" width="500" hide-label show-row="{{false}}"/>
+                    <picker bindchange="bindPickerYearChange" value="{{yindex}}" range="{{year}}" name="babyYear">
+                        <view class="picker">
+                        当前选择：{{year[yindex]}}
+                        </view>
+                    </picker>
+                    <picker bindchange="bindPickerMonthChange" value="{{mindex}}" range="{{month}}"  name="babyMonth">
+                        <view class="picker">
+                        当前选择：{{month[mindex]}}
+                        </view>
+                    </picker>
+                    <radio-group name="babySex">
+                        <label><radio value="1"/>男</label>
+                        <label><radio value="0"/>女</label>
+                    </radio-group>
+                </view>
+                <view class="button-class">
+                    <view class="l-button-class">
+                        <button formType="submit">{{btnSwiper}}</button>
+                    </view>
+                </view>
+            </form>
+         </swiper-item>
+         <swiper-item  wx:if = "{{swiper.region}}">
+          <form name="customer"  catchsubmit="submitRegion">
+            <view class="swiper-item">
+                <view class="w-bottom">生活在</view>
+                    <picker mode="region" bindchange="bindRegionChange" name="customerRegion"  value="{{region}}" custom-item="{{customItem}}">
+                        <view class="l-input-name">
+                            <l-input value="{{region[0]}}" width="500" hide-label show-row="{{false}}"/>
+                            <view class="name-tips">省</view>
+                        </view>
+                    </picker>
+            </view>
+            <view class="button-class">
+                    <view class="l-button-class">
+                        <button formType="submit">{{btnSwiper}}</button>
+                    </view>
+                </view>
+          </form>
+        </swiper-item>
+        
+        <swiper-item  wx:if = "{{swiper.phone}}">
+          <form name="customer"  catchsubmit="submitPhone">
+            <view class="swiper-item">
+                <view>创建一个享读ID</view>
+                <view class="l-input-name">
+                    <l-input name="customerPhone" value="{{customer.customerPhone}}" width="500" hide-label show-row="{{false}}"/>
+                </view>
+                <view class="l-input-name">
+                    <l-input name="Verification" value="{{Verification}}" width="500" hide-label show-row="{{false}}"/>
+                </view>
+            </view>
+            <view class="button-class">
+                <view class="l-button-class">
+                    <view wx:if="{{!issubmitForm}}"><button formType="submit">{{btnSwiper}}</button></view>
+                    <view wx:else>注册成功</view>
+                </view>
+            </view>
+            </form>
+          </swiper-item>
+          <swiper-item  wx:if = "{{swiper.welcome}}">
+            <view class="swiper-item">
+                <view>欢迎来到享读大家庭</view>
+                <view>二维码</view>
+            </view>
+          </swiper-item>
+      </swiper>
+  </view>
+
+</view>
+
+<!-- 之前的版本，暂时不删除 -->
+<l-mask show="{{show}}"> </l-mask>
+<view class="container" wx:if = "{{false}}">
     <view class="customer">
         <view class="customerName">{{customer.customerName}}</view>
         <view class="addCustomeInfo"><l-button bindtap="onAddCustomeInfo" type="success">{{motto}}</l-button></view>

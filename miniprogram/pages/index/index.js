@@ -25,10 +25,52 @@ Page({
     show: false,
     isAddCustomeInfo: false,   // 是否填写信息，有用户信息不填写，
     noGetOfficial: false , // 关注公众号是否加载失败
+
+    // 滑动模块
+    issubmitForm: false,
+    rpxHeight:app.rpxHeight?app.rpxHeight:500, 
+    background: ['demo-text-1', 'demo-text-2', 'demo-text-3'],
+    swiper:{
+      'name': false,
+      'age': false,
+      'region': false,
+      'phone': false,
+      'welcome': false,
+      'btn':false
+    },
+    btnSwiper: '下一页',
+    indicatorDots: true,
+    vertical: false,
+    autoplay: false,
+    interval: 2000,
+    currentTab: 0,
+    duration: 500,
+    // 选择器
+    year: [],
+    month: ['01','02','03','04','05','06','07','08','09','10','11','12'],
+    region: ['广东省', '广州市', '海珠区'],
+    customItem: '全部'
+
   },
   onLoad: function() {
  
     let that = this 
+   
+    // 初始化年选择器内容
+    let timestamp = Date.parse(new Date());
+    let date = new Date(timestamp);
+    //获取年份  
+    let Y =date.getFullYear();
+    console.log(Y)
+    if(!Y){
+      // 没有值，默认
+      Y = 2088
+    }
+    for(let i = 2000;i<=Y;i++){
+      that.data.year.push(i)
+    }
+    that.setData({year:that.data.year})
+    console.log(that.data.year)
     if(app.editCount<1){
       wx.showToast({
         title: '请勿恶意提交',
@@ -66,6 +108,8 @@ Page({
     }
 
   },
+
+
   // 获取用户信息
   getCustomerData(openid){
     var that = this
@@ -266,6 +310,115 @@ Page({
     wx.navigateTo({
       url: '/pages/wxGroupFour/wxGroupFour',
     })
+  },
+  changeIndicatorDots() {
+    this.setData({
+      indicatorDots: !this.data.indicatorDots
+    })
+  },
+  // 点击下一页
+  onSwiper(){
+    if(!this.data.swiper.name){
+      this.setData({
+        'swiper.name':true,
+        currentTab:1
+      })
+    }else if(!this.data.swiper.age){
+      this.setData({
+        'swiper.age':true,
+        currentTab:2
+      })
+    }else if(!this.data.swiper.region){
+      this.setData({
+        'swiper.region':true,
+        currentTab:3
+      })
+    }else if(!this.data.swiper.phone){
+      this.setData({
+        'swiper.phone':true,
+        currentTab:4
+      })
+    }else if(!this.data.swiper.welcome){
+      this.setData({
+        'swiper.welcome':true,
+        currentTab:5
+      })
+    }
+   
+  },
+  // picl选择器事件
+  // 年
+  bindPickerYearChange: function(e) {
+    console.log( e.detail.value)
+    let yindex =  e.detail.value
+    this.setData({
+      yindex,
+    })
+  },
+  // 月
+  bindPickerMonthChange: function(e) {
+    let mindex =  e.detail.value
+    console.log(mindex)
+    this.setData({
+      mindex,
+      // month: this.data.month[mindex]
+    })
+  },
+  // 区域
+  bindRegionChange: function (e) {
+    console.log('picker发送选择改变，携带值为', e.detail.value)
+    this.setData({
+      region: e.detail.value
+    })
+  },
+  // 点击名字页
+  submitName(event){
+    let that = this
+    const {detail} = event;
+    console.log('submitPhone',detail.value)
+    that.data.customer.customerName = detail.value.customerName
+    // 下一页
+    that.onSwiper()
+
+  },
+  // 点击宝宝页1
+  submitBabyInfo(event){
+    let that = this
+    let baby = {}
+    const {detail} = event;
+    console.log('submitBabyInfo',detail.value)
+    baby.babyName = detail.value.babyName
+    baby.babySex = detail.value.babySex
+    baby.babyBirthday = that.data.year[detail.value.babyYear] + '-' + that.data.month[detail.value.babyMonth]
+    that.data.customer.baby.push(baby)
+    // 下一页
+    that.onSwiper()
+  },
+   // 点击省份页
+  submitRegion(event){
+    let that = this
+    const {detail} = event;
+    console.log('submitRegion',detail.value)
+    that.data.customer.customerRegion = detail.value.customerRegion
+    // 下一页
+    that.onSwiper()
+
+  },
+  // 点击手机页
+  submitPhone(event){
+    let that = this
+    const {detail} = event;
+    console.log('submitPhone',detail.value)
+    that.data.customer.customerPhone = detail.value.customerPhone
+    that.setData({
+      issubmitForm:true
+    })
+    // 下一页
+    console.log('that.data.customer',that.data.customer)
+    that.onSwiper()
+
   }
+   
+  
  
 })

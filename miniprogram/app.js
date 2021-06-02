@@ -13,16 +13,30 @@ App({
         traceUser: true,
       })
     }
+    let that = this
+    // 全屏
+    wx.getSystemInfo({
+      success:function(res){
+        let clientHeight = res.windowHeight
+        let clientWidth = res.windowWidth
+        let ratio = 750 / clientWidth
+        let rpxHeight = ratio * clientHeight
+        that.globalData.rpxHeight = rpxHeight
+        console.log('app.js->rpxHeight',rpxHeight)
+      }
+     })
     // 用户信息
-    var customer = wx.getStorageSync('customer')
+    let customer = wx.getStorageSync('customer')
     if(customer){
-      this.globalData.customer = customer
+      that.globalData.customer = customer
+      console.log('app.js->customer',customer)
     }
      // 用户登录信息
-     var userInfo = wx.getStorageSync('userInfo')
+     let userInfo = wx.getStorageSync('userInfo')
      if(userInfo){
-       this.globalData.userInfo = userInfo
-       this.globalData.isLogin = true
+       that.globalData.userInfo = userInfo
+       that.globalData.isLogin = true
+       console.log('app.js->userInfo',userInfo)
      }
    
   },
@@ -32,6 +46,7 @@ App({
     }, // 用户信息
     editCount: 3, //默认只能修改5次
     userInfo: {}, // 用户登录信息
-    isLogin: false // 是否登录
+    isLogin: false, // 是否登录
+    rpxHeight: 0, // 屏幕高度
   }
 })
