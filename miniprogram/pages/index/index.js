@@ -8,8 +8,12 @@ Page({
     motto: '登记',
     customer: 
     {  
+      //顾客信息
+      userInfo: {}, // 微信等信息
       openid: '',
       customerName: '',
+      customerPhone: '',
+      customerRegion: '',
       // 宝宝信息
       baby:
       [
@@ -22,8 +26,14 @@ Page({
        // }
       ] 
     },
-    show: false,
-    isAddCustomeInfo: false,   // 是否填写信息，有用户信息不填写，
+    isAdd: true, // 判断是添加信息还是修改，true为添加信息,false为修改
+    show: false, // 遮罩层
+    toastShow: false, // 提示框
+    toastSuccessShow: false, // 成功提示
+    toastFailShow: false, // 失败提示
+    maskShow: false, // 遮罩层
+    hasSubmit: false, //是否提交，再次提交，视为修改
+    hasUserInfo: false ,   // 是否获取用户信息
     noGetOfficial: false , // 关注公众号是否加载失败
 
     // 滑动模块
@@ -48,14 +58,32 @@ Page({
     // 选择器
     year: [],
     month: ['01','02','03','04','05','06','07','08','09','10','11','12'],
-    region: ['广东省', '广州市', '海珠区'],
-    customItem: '全部'
+    region: ['贵州省', '贵阳市', '南明区'],
+    customItem: '全部',
+    // 校验规则
+    // 表单验证
+    telphoneRules:{
+      required: true,
+      message: '请填写正确手机号码',
+      pattern: '^[1][3-9]{1}[0-9]{9}$',
+      trigger: 'blur',
+    },
+    nameRules:[
+      {type: 'string',required: true,message: '必选项不能为空',trigger: 'blur'},
+      { min: 1, max: 15, message: '名字长度在1-10个字符之间', trigger: 'change' }
+    ],
+    noEmptyRules:[
+      {type: 'string',required: true,message: '必选项不能为空',trigger: 'blur'},
+    ],
 
   },
   onLoad: function() {
  
     let that = this 
-   
+    // 获取OPENID
+    if(!app.openid){
+      this.getOpenid()
+    }
     // 初始化年选择器内容
     let timestamp = Date.parse(new Date());
     let date = new Date(timestamp);
@@ -109,7 +137,21 @@ Page({
 
   },
 
-
+  getOpenid(){
+    wx.cloud.callFunction({    //添加livingHistory表记录
+      name: 'login',
+      success: res => {
+        // 存储openid，unionid，userinfo等用户信息
+        console.log(res.result) 
+        app.openid = res.result.openid
+        app.unionid = res.result.unionid
+        this.getCustomerData(app.userInfo.openid)
+      },
+      fail: err => {
+        console.log('☀ login.js ▌ fail userInfo :', err)
+      }
+    })
+  },
   // 获取用户信息
   getCustomerData(openid){
     var that = this
@@ -167,8 +209,8 @@ Page({
       success: res => {
         // 存储openid，unionid，userinfo等用户信息
         console.log(res.result) 
-        app.userInfo.openid = res.result.openid
-        app.userInfo.unionid = res.result.unionid
+        app.openid = res.result.openid
+        app.unionid = res.result.unionid
         this.getCustomerData(app.userInfo.openid)
       },
       fail: err => {
@@ -371,15 +413,44 @@ Page({
       region: e.detail.value
     })
   },
+  // 戳我进群
+  onAddStep(){
+    // 弹出获取用户信息同意框
+    this.getUserProfile()
+  },
   // 点击名字页
   submitName(event){
+    
     let that = this
     const {detail} = event;
     console.log('submitPhone',detail.value)
+    //中英文姓名验证(没有长度限制，考虑到少数名族和外国人名字很长)：
+    if (!(/^[\u4E00-\u9FA5A-Za-z]+$/.test(detail.value.customerName))) {
+        wx.showToast({
+          title: '姓名有误~',
+          duration: 2000,
+          icon: true
+        });
+        return
+    }
     that.data.customer.customerName = detail.value.customerName
     // 下一页
+    
     that.onSwiper()
 
+  },
+
+  getUserProfile(e) {
+
+    var　that = this 
+    // 获取用户信息，开发者每次通过该接口获取用户个人信息均需用户确认，开发者妥善保管用户快速填写的头像昵称，避免重复弹窗
+    wx.getUserProfile({
+      desc: '用户信息', // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
+      success: (res) => {
+        app.userInfo = res.userInfo
+        that.onSwiper()
+      }
+    })
   },
   // 点击宝宝页1
   submitBabyInfo(event){
@@ -387,6 +458,32 @@ Page({
     let baby = {}
     const {detail} = event;
     console.log('submitBabyInfo',detail.value)
+     //中英文姓名验证(没有长度限制，考虑到少数名族和外国人名字很长)：
+     if (!(/^[\u4E00-\u9FA5A-Za-z]+$/.test(detail.value.babyName))) {
+      wx.showToast({
+        title: '姓名有误~',
+        duration: 2000,
+        icon: true
+      });
+      return
+    }
+    if (!(/^.{4}$/.test(that.data.year[detail.value.babyYear]))) {
+      wx.showToast({
+        title: '请输入年份~',
+        duration: 2000,
+        icon: true
+      });
+      return
+    }
+    if (!(/^.{2}$/.test(that.data.month[detail.value.babyMonth]))) {
+      wx.showToast({
+        title: '请输入月份~',
+        duration: 2000,
+        icon: true
+      });
+      return
+    }
+    
     baby.babyName = detail.value.babyName
     baby.babySex = detail.value.babySex
     baby.babyBirthday = that.data.year[detail.value.babyYear] + '-' + that.data.month[detail.value.babyMonth]
@@ -408,16 +505,142 @@ Page({
   submitPhone(event){
     let that = this
     const {detail} = event;
-    console.log('submitPhone',detail.value)
-    that.data.customer.customerPhone = detail.value.customerPhone
+    let phone = detail.value.customerPhone
+    console.log('submitPhone',phone)
+    ///手机号码验证：
+    if (!(/^((13[0-9])|(14[0-9])|(15[0-9])|(17[0-9])|(18[0-9]))\d{8}$/.test(phone))) {
+      wx.showToast({
+      title: '手机号码有误',
+      duration: 2000,
+      icon:'none'
+      });
+      return
+    }
+    that.data.customer.customerPhone = phone
+   
+   
     that.setData({
       issubmitForm:true
     })
-    // 下一页
-    console.log('that.data.customer',that.data.customer)
-    that.onSwiper()
+    // 确认框
+    wx.showModal({
+      title: '确认提交',
+      content: '提交之后不能再修改！',
+      success: function (res) {
+        if (res.confirm) {
+          that.data.customer.customerName =  detail.values.customerName
+          that.data.customer.customerPhone = detail.values.customerPhone
+          that.data.customer.customerAddress =  detail.values.customerAddress
+          that.data.customer.openid =  app.openid
+          that.data.customer.unionid =  app.unionid
+          that.data.customer.userInfo =  app.userInfo
+          console.log('☀ index.js ▌ submit 提交到数据库的信息 :',that.data.customer)
+          that.addCustomerInfo()
+          // 下一页
+          console.log('that.data.customer',that.data.customer)
+          
+        } else {
+          return
+        }
+      }
+    })
+    
 
-  }
+  },
+
+  // 表单提交，判断用户本地是否有用户信息，没有弹出授权
+  // 保存信息时，不用查询数据库，用户信息在onload时就根据openid进行查询
+  // 提交时查看数据库是否有信息，有就更换，没有增加
+  // 提交时会保存一份在本地，下次不删除小程序就不会再次出现提交
+  
+  addCustomerInfo(){
+    var that = this
+    that.setData({show:true})
+    if(that.data.isAdd){
+      // 添加信息
+      that.add()
+    }else{
+      // 修改信息
+      that.edit()
+    }
+    
+  },
+  add(){
+    var that = this
+    let time = util.formatTime(new Date)  // 获取当前最新时间,
+    wx.cloud.callFunction({    //添加livingHistory表记录
+      name: 'addCustomerInfo',
+      data: {
+        table: 'customerInfo',
+        openid: that.data.customer.openid,
+        userInfo: that.data.customer.userInfo,
+        customerName :  that.data.customer.customerName,
+        customerPhone : that.data.customer.customerPhone,
+        customerAddress :  that.data.customer.customerAddress,
+        baby: that.data.customer.baby,
+        time: time
+      },
+      success: res => {
+        console.log('add',res)
+        that.setData({
+          hasSubmit: true,
+          toastSuccessShow:true
+        })
+        wx.setStorage({
+          data: that.data.customer,
+          key: 'customer',
+        })
+        app.customer = this.data.customer
+        that.onSwiper()
+      },
+      fail: err => {
+        console.log('add',err)
+        that.setData({
+          toastFailShow:true
+        }) 
+      }
+    })
+  },
+  edit(){
+    var that = this
+    app.editCount--
+    if(app.editCount<1){
+      that.setData({show:false})
+      wx.showToast({
+        title: '请勿恶意提交',
+      })
+      return   
+    }
+    wx.cloud.callFunction({    //添加livingHistory表记录
+      name: 'editCustomerInfo',
+      data: {
+        _id: that.data.customer._id,
+        customerName :  that.data.customer.customerName,
+        customerPhone : that.data.customer.customerPhone,
+        customerAddress :  that.data.customer.customerAddress,
+        baby: that.data.customer.baby,
+      },
+      success: res => {
+        console.log('edit',res)
+        that.setData({
+          hasSubmit: true,
+          toastSuccessShow:true
+        })
+        wx.setStorage({
+          data: that.data.customer,
+          key: 'customer',
+        })
+        app.customer = this.data.customer
+        that.onSwiper()
+      },
+      fail: err => {
+        console.log('add',err)
+        that.setData({
+          toastFailShow:true
+        })
+      }
+    })
+  },
    
   
  

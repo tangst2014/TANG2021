@@ -46,6 +46,8 @@ App({
     }, // 用户信息
     editCount: 3, //默认只能修改5次
     userInfo: {}, // 用户登录信息
+    openid:'',
+    unionid:'',
     isLogin: false, // 是否登录
     rpxHeight: 0, // 屏幕高度
   }

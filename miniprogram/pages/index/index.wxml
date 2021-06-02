@@ -8,11 +8,11 @@
           <swiper-item>
             <view class="swiper-item">
                <view class="wxtap">
-                <view catchtap="onSwiper">戳我进群：大师</view>
-                <view class="w-margin">满减，优惠享不停</view>
+                <view class="wxtap-tips" catchtap="onAddStep">戳我进群：大师<image class="image" src="/static/hand.png"></image></view>
                </view>
+               <view class="w-margin">满减，优惠享不停</view>
                <view class="wxtip">
-                一起践行阅读推广，亲子阅读路上有路上有享读保障~
+                一起践行阅读推广，亲子阅读路上有享读保障~
                </view>
             </view>
 
@@ -22,8 +22,8 @@
                 <view class="swiper-item">
                     <view>先报上你的大名</view>
                     <view class="l-input-name">
-                        <l-input name="customerName" value="{{customer.customerName}}" width="500" hide-label show-row="{{false}}"/>
-                        <view class="name-tips">妈/爸</view>
+                        <l-input name="customerName" placeholder="输入你的名字" value="{{customer.customerName}}" width="500" hide-label show-row="{{false}}"/>
+                        <view class="name-tips">妈/爸<image class="xingxing" src="/static/noempty.png"></image></view>
                     </view>
                     <view class="w-color w-margin">例子：小明妈/爸</view>
                 </view>
@@ -38,21 +38,39 @@
             <form name="customer"  catchsubmit="submitBabyInfo">
                 <view class="swiper-item">
                     <view class="baby-title">吞金兽出生年月</view>
-                     星：<l-input name="babyName" value="{{name}}" width="500" hide-label show-row="{{false}}"/>
-                    <picker bindchange="bindPickerYearChange" value="{{yindex}}" range="{{year}}" name="babyYear">
-                        <view class="picker">
-                        当前选择：{{year[yindex]}}
-                        </view>
-                    </picker>
-                    <picker bindchange="bindPickerMonthChange" value="{{mindex}}" range="{{month}}"  name="babyMonth">
-                        <view class="picker">
-                        当前选择：{{month[mindex]}}
-                        </view>
-                    </picker>
-                    <radio-group name="babySex">
-                        <label><radio value="1"/>男</label>
-                        <label><radio value="0"/>女</label>
-                    </radio-group>
+                    <view class="baby">
+                        <view class="baby-xingxing"><image class="xingxing" src="/static/noempty.png"></image></view>
+                        <text>姓名:</text>
+                        <l-input name="babyName" placeholder="输入宝宝名字" value="{{name}}" width="500" hide-label show-row="{{false}}"/>
+                        
+                    </view>
+                    <view class="baby">
+                        <view class="baby-xingxing"><image class="xingxing" src="/static/noempty.png"></image></view>
+                        <text>生日：</text> 
+                        <picker bindchange="bindPickerYearChange" value="{{yindex}}" range="{{year}}" name="babyYear">
+                            <view class="picker">
+                                {{year[yindex]}}
+                            </view>    
+                        </picker>
+                        <view>年</view>
+                        <picker bindchange="bindPickerMonthChange" value="{{mindex}}" range="{{month}}"  name="babyMonth">
+                            <view class="picker">
+                                {{month[mindex]}}
+                            </view>
+                        </picker>
+                        <view>月</view>
+                        
+                    </view>
+                    
+                    
+                    <view class="baby">
+                        <view class="baby-xingxing"><image class="xingxing" src="/static/noempty.png"></image></view>
+                        <text>性别：</text>
+                        <l-radio-group name="babySex" placement="row" class="l-class" current = "{{baby.babySex}}">
+                            <l-radio key="1">男</l-radio>
+                            <l-radio key="0">女</l-radio>
+                        </l-radio-group>
+                    </view>
                 </view>
                 <view class="button-class">
                     <view class="l-button-class">
@@ -68,7 +86,9 @@
                     <picker mode="region" bindchange="bindRegionChange" name="customerRegion"  value="{{region}}" custom-item="{{customItem}}">
                         <view class="l-input-name">
                             <l-input value="{{region[0]}}" width="500" hide-label show-row="{{false}}"/>
-                            <view class="name-tips">省</view>
+                            <view class="name-tips">省
+                                <view class="baby-xingxing"><image class="xingxing" src="/static/noempty.png"></image></view>
+                            </view>
                         </view>
                     </picker>
             </view>
@@ -85,10 +105,14 @@
             <view class="swiper-item">
                 <view>创建一个享读ID</view>
                 <view class="l-input-name">
-                    <l-input name="customerPhone" value="{{customer.customerPhone}}" width="500" hide-label show-row="{{false}}"/>
+                    <view class="baby-xingxing"><image class="xingxing" src="/static/noempty.png"></image></view>
+                    <text>手机号:</text>
+                    <l-input name="customerPhone" type="number" placeholder="输入手机号" value="{{customer.customerPhone}}" width="500" hide-label show-row="{{false}}"/>
                 </view>
                 <view class="l-input-name">
-                    <l-input name="Verification" value="{{Verification}}" width="500" hide-label show-row="{{false}}"/>
+                    <view class="baby-xingxing"><image class="xingxing" src="/static/noempty.png"></image></view>
+                    <text>验证码:</text>
+                    <l-input name="Verification" placeholder="输入验证码" value="{{Verification}}" width="500" hide-label show-row="{{false}}"/>
                 </view>
             </view>
             <view class="button-class">
@@ -101,14 +125,39 @@
           </swiper-item>
           <swiper-item  wx:if = "{{swiper.welcome}}">
             <view class="swiper-item">
-                <view>欢迎来到享读大家庭</view>
-                <view>二维码</view>
-            </view>
+                <view class="welcome">欢迎来到享读大家庭</view>
+                <view class="t-margin">
+                    <official-account bindload="officialLoad" binderror="officialError"></official-account>
+                    <view wx:if="{{noGetOfficial}}">
+                        <view bindtap="onOfficialArticle">点我，关注公号，获取二维码</view>
+                    </view>
+                </view>
+                </view>
           </swiper-item>
       </swiper>
   </view>
 
 </view>
+
+
+
+<l-mask show="{{maskShow}}" locked="{{true}}"> 
+</l-mask>
+<l-toast
+show="{{toastShow}}"
+icon="error "
+title="请正确填写宝宝信息~"
+/>
+<l-toast
+show="{{toastSuccessShow}}"
+icon="success"
+title="保存成功~"
+/>
+<l-toast
+show="{{toastFailShow}}"
+icon="error"
+title="保存失败，请检查信息~"
+/>
 
 <!-- 之前的版本，暂时不删除 -->
 <l-mask show="{{show}}"> </l-mask>

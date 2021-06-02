@@ -7,6 +7,7 @@
 .w-bottom{
     margin-bottom: 20px;
 }
+
 .container .customer{
     display: flex;
     justify-content: space-between;
@@ -37,11 +38,21 @@
 }
 
 /* 以上是之前的版本，最新样式在下面 */
+button{
+    color: #464545;
+}
+.l-class{
+    font-size: 40rpx;
+}
 .w-margin{
     margin-top: 30rpx;
 }
 .w-color{
     color:gray;
+}
+.xingxing{
+    width: 38rpx;
+    height: 38rpx;
 }
 .button-class{
     display: flex;
@@ -54,6 +65,8 @@
 }
 .container{
     margin: 0 15px;
+    font-size: 40rpx;
+    color: rgb(29, 28, 28);
    
 }
 .container .swiper-item{
@@ -63,6 +76,19 @@
     display: flex;
     flex-direction: column;
 }
+.container .swiper-item .wxtap .wxtap-tips{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 50rpx;
+    color: red;
+    font-stretch: bold;
+}
+
+.container .swiper-item .wxtap .wxtap-tips .image{
+    width: 50px;
+    height: 50px;
+}
 .container .swiper-item .wxtip{
     margin-top: 242rpx;
     display: flex;
@@ -71,12 +97,45 @@
 
 .swiper-item .l-input-name{
     position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 25px;
+    border-bottom: 1px solid #d0d0d0;
 }
 .swiper-item .name-tips{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
     position: absolute;
     right: 0;
-    bottom: 8px;
+    bottom: 0px;
 }
+
 .swiper-item .baby-title{
     text-align: center;
+}
+.swiper-item .picker{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding:10px 0;
+    width: 50px;
+    height: 40rpx;
+    border-bottom: 1px solid #d0d0d0;
+}
+.swiper-item .baby{
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    margin: 20px 0;
+    align-items: center;
+}
+.swiper-item .baby .baby-xingxing{
+    height: 100%;
+}
+.welcome{
+    font-size: 50rpx;
+    color: red;
+    font-stretch: bold;
 }
