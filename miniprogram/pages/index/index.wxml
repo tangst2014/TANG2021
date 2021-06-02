@@ -35,7 +35,7 @@
             </form>
           </swiper-item>
           <swiper-item  wx:if = "{{swiper.age}}">
-            <form name="customer"  catchsubmit="submitBabyInfo">
+            <form name="customer"  catchsubmit="submitBabyInfo" catchreset="formReset">
                 <view class="swiper-item">
                     <view class="baby-title">吞金兽出生年月</view>
                     <view class="baby">
@@ -77,6 +77,8 @@
                         <button formType="submit">{{btnSwiper}}</button>
                     </view>
                 </view>
+                <button style="margin: 30rpx 0" formType="reset">Reset</button>
+                <view class="addBaby" catchtap="addBaby"><l-icon name="add"/></view>
             </form>
          </swiper-item>
          <swiper-item  wx:if = "{{swiper.region}}">
@@ -139,8 +141,6 @@
 
 </view>
 
-
-
 <l-mask show="{{maskShow}}" locked="{{true}}"> 
 </l-mask>
 <l-toast
@@ -160,8 +160,8 @@ title="保存失败，请检查信息~"
 />
 
 <!-- 之前的版本，暂时不删除 -->
-<l-mask show="{{show}}"> </l-mask>
-<view class="container" wx:if = "{{false}}">
+<!-- <l-mask show="{{show}}"> </l-mask> -->
+<!-- <view class="container" wx:if = "{{false}}">
     <view class="customer">
         <view class="customerName">{{customer.customerName}}</view>
         <view class="addCustomeInfo"><l-button bindtap="onAddCustomeInfo" type="success">{{motto}}</l-button></view>
@@ -193,6 +193,6 @@ title="保存失败，请检查信息~"
 
         </view>
     </view>
-</view>
+</view> -->
 
 

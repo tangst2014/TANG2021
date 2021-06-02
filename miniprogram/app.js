@@ -31,12 +31,24 @@ App({
       that.globalData.customer = customer
       console.log('app.js->customer',customer)
     }
-     // 用户登录信息
+     // 用户微信信息
      let userInfo = wx.getStorageSync('userInfo')
      if(userInfo){
        that.globalData.userInfo = userInfo
        that.globalData.isLogin = true
        console.log('app.js->userInfo',userInfo)
+     }
+     // openid
+     let openid = wx.getStorageSync('openid')
+     if(openid){
+       that.globalData.openid = openid
+       console.log('app.js->openid',openid)
+     }
+     // unionid微信开放平台
+     let unionid = wx.getStorageSync('unionid')
+     if(unionid){
+       that.globalData.unionid = unionid
+       console.log('app.js->userInfo',unionid)
      }
    
   },
@@ -45,9 +57,9 @@ App({
       baby:[]
     }, // 用户信息
     editCount: 3, //默认只能修改5次
-    userInfo: {}, // 用户登录信息
-    openid:'',
-    unionid:'',
+    userInfo: {}, // 用户微信信息
+    openid: "", // openid
+    unionid: "", // unionid微信开放平台
     isLogin: false, // 是否登录
     rpxHeight: 0, // 屏幕高度
   }

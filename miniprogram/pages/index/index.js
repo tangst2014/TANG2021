@@ -5,15 +5,15 @@ const db = wx.cloud.database({});
 const getCustomerInfo = db.collection('customerInfo');
 Page({
   data: {
-    motto: '登记',
+    //顾客信息
     customer: 
     {  
-      //顾客信息
-      userInfo: {}, // 微信等信息
-      openid: '',
-      customerName: '',
-      customerPhone: '',
-      customerRegion: '',
+      // userInfo: {}, // 微信等信息
+      // openid: '',
+      // unionid:'', // unionid微信开放平台
+      // customerName: '',
+      // customerPhone: '',
+      // customerRegion: '',
       // 宝宝信息
       baby:
       [
@@ -27,13 +27,11 @@ Page({
       ] 
     },
     isAdd: true, // 判断是添加信息还是修改，true为添加信息,false为修改
+    isAddBabyInfo: false, // 判断是添加多个宝宝
     show: false, // 遮罩层
     toastShow: false, // 提示框
     toastSuccessShow: false, // 成功提示
     toastFailShow: false, // 失败提示
-    maskShow: false, // 遮罩层
-    hasSubmit: false, //是否提交，再次提交，视为修改
-    hasUserInfo: false ,   // 是否获取用户信息
     noGetOfficial: false , // 关注公众号是否加载失败
 
     // 滑动模块
@@ -60,21 +58,6 @@ Page({
     month: ['01','02','03','04','05','06','07','08','09','10','11','12'],
     region: ['贵州省', '贵阳市', '南明区'],
     customItem: '全部',
-    // 校验规则
-    // 表单验证
-    telphoneRules:{
-      required: true,
-      message: '请填写正确手机号码',
-      pattern: '^[1][3-9]{1}[0-9]{9}$',
-      trigger: 'blur',
-    },
-    nameRules:[
-      {type: 'string',required: true,message: '必选项不能为空',trigger: 'blur'},
-      { min: 1, max: 15, message: '名字长度在1-10个字符之间', trigger: 'change' }
-    ],
-    noEmptyRules:[
-      {type: 'string',required: true,message: '必选项不能为空',trigger: 'blur'},
-    ],
 
   },
   onLoad: function() {
@@ -98,16 +81,18 @@ Page({
       that.data.year.push(i)
     }
     that.setData({year:that.data.year})
-    console.log(that.data.year)
+    // 修改次数提醒
     if(app.editCount<1){
       wx.showToast({
         title: '请勿恶意提交',
       })
       app.editCount = 3
     }
+    
+    // 用户信息
     console.log('☀ index.js ▌ onLoad app.customer : ', app.customer)
-    // 1，查询本地用户信息
     if(app.customer.baby.length){
+       // 1，查询本地用户信息
        // 计算年龄
        let age = 0
        for(var i=0;i<app.customer.baby.length;i++){
@@ -117,7 +102,6 @@ Page({
        that.setData({
          customer: app.customer,
          hasSubmit: true,
-         motto: '修改',
        })
        // 后台重新刷新本地缓存
       this.getCustomerDataNoOpenid()
@@ -125,12 +109,12 @@ Page({
       // 2，没有本地信息
       // 查询数据库，有openid,直接查询；没有openid,先获取opendi
       // 
-      if(app.userInfo == undefined||JSON.stringify(app.userInfo) == "{}"){
-        // app.userInfo.openid为空或undefined
+      if(app.openid == undefined||JSON.stringify(app.openid) == ""){
+        // app.openid为空或undefined
         that.getCustomerDataNoOpenid()
       }else{
         // 登陆过
-        that.getCustomerData(app.userInfo)
+        that.getCustomerData(app.openid)
       }
       
     }
@@ -142,10 +126,10 @@ Page({
       name: 'login',
       success: res => {
         // 存储openid，unionid，userinfo等用户信息
-        console.log(res.result) 
+        console.log('index.js | 初始化getOpenid->openid: ',res.result.openid) 
         app.openid = res.result.openid
         app.unionid = res.result.unionid
-        this.getCustomerData(app.userInfo.openid)
+        this.getCustomerData(app.openid)
       },
       fail: err => {
         console.log('☀ login.js ▌ fail userInfo :', err)
@@ -155,6 +139,10 @@ Page({
   // 获取用户信息
   getCustomerData(openid){
     var that = this
+    if(openid=''){
+      console.log('☀ login.js ▌ openid 为空')
+      retrun
+    }
     getCustomerInfo.where({
       openid: openid
     })
@@ -173,7 +161,6 @@ Page({
           that.setData({
             customer:app.customer,
             hasSubmit: true,
-            motto: '修改'
           })
           wx.setStorage({
             data: res.data[0],
@@ -187,7 +174,6 @@ Page({
           that.setData({
             customer:app.customer,
             hasSubmit: false,
-            motto: '登记'
           })
           wx.setStorage({
             data: app.customer,
@@ -208,57 +194,22 @@ Page({
       name: 'login',
       success: res => {
         // 存储openid，unionid，userinfo等用户信息
-        console.log(res.result) 
         app.openid = res.result.openid
         app.unionid = res.result.unionid
-        this.getCustomerData(app.userInfo.openid)
+        wx.setStorage({
+          data: app.openid,
+          key: 'openid',
+        })
+        wx.setStorage({
+          data: app.unionid,
+          key: 'unionid',
+        })
+        this.getCustomerData(app.openid)
       },
       fail: err => {
         console.log('☀ login.js ▌ fail userInfo :', err)
       }
     })
-  },
- 
-  // 弹出获取用户信息同意框
-  onAddCustomeInfo(e) {
-    var　that = this 
-    that.setData({show:true})
-    setTimeout(function () {
-      that.setData({
-        show: false
-      })
-    }, 2000)
-  
-    //app.userInfo.userInfo包括头像，微信名等信息
-    if(app.userInfo.userInfo == undefined||JSON.stringify(app.userInfo.userInfo) == "{}"){
-      // 获取用户信息，开发者每次通过该接口获取用户个人信息均需用户确认，开发者妥善保管用户快速填写的头像昵称，避免重复弹窗
-      wx.getUserProfile({
-        desc: '用户信息', // 声明获取用户个人信息后的用途，后续会展示在弹窗中，请谨慎填写
-        success: (res) => {
-          console.log('getUserProfile', res.userInfo)
-          app.userInfo.userInfo = res.userInfo
-          wx.setStorage({
-            key: 'userInfo',
-            data: app.userInfo,
-          })
-          that.setData({
-            userInfo: res.userInfo,
-            hasUserInfo: true,
-          })
-          wx.navigateTo({
-            url: '/pages/forms/forms',
-          })
-        },
-        fail:(err) => {
-          that.setData({show:false})
-        }
-      })
-    }else{
-      wx.navigateTo({
-        url: '/pages/forms/forms',
-      })
-    }
-    
   },
   // 根据出生日期计算年龄周岁
   getAge(strBirthday){
@@ -408,15 +359,23 @@ Page({
   },
   // 区域
   bindRegionChange: function (e) {
-    console.log('picker发送选择改变，携带值为', e.detail.value)
+    console.log('index.js |-> bindRegionChange值为', e.detail.value)
     this.setData({
       region: e.detail.value
     })
   },
   // 戳我进群
+  // 先验证本地是否有用户微信信息，openid是否获取到
   onAddStep(){
     // 弹出获取用户信息同意框
-    this.getUserProfile()
+    if(app.userInfo == undefined||JSON.stringify(app.userInfo) == "{}"){
+      // 本地没有微信等信息
+      this.getUserProfile()
+    }else{
+      // 有，直接跳转下一页
+      this.onSwiper()
+    }
+    
   },
   // 点击名字页
   submitName(event){
@@ -424,14 +383,22 @@ Page({
     let that = this
     const {detail} = event;
     console.log('submitPhone',detail.value)
-    //中英文姓名验证(没有长度限制，考虑到少数名族和外国人名字很长)：
+    //中英文姓名验证(考虑到少数名族和外国人名字很长)：
     if (!(/^[\u4E00-\u9FA5A-Za-z]+$/.test(detail.value.customerName))) {
         wx.showToast({
-          title: '姓名有误~',
+          title: '姓名只能是汉字或英文~',
           duration: 2000,
           icon: true
         });
         return
+    }
+    if(detail.value.customerName.length>30){
+      wx.showToast({
+        title: '姓名太长了~',
+        duration: 2000,
+        icon: true
+      });
+      return
     }
     that.data.customer.customerName = detail.value.customerName
     // 下一页
@@ -458,10 +425,18 @@ Page({
     let baby = {}
     const {detail} = event;
     console.log('submitBabyInfo',detail.value)
-     //中英文姓名验证(没有长度限制，考虑到少数名族和外国人名字很长)：
+     //中英文姓名验证(考虑到少数名族和外国人名字很长)：
      if (!(/^[\u4E00-\u9FA5A-Za-z]+$/.test(detail.value.babyName))) {
       wx.showToast({
         title: '姓名有误~',
+        duration: 2000,
+        icon: true
+      });
+      return
+    }
+    if(detail.value.babyName.length>30){
+      wx.showToast({
+        title: '姓名太长了~',
         duration: 2000,
         icon: true
       });
@@ -489,9 +464,27 @@ Page({
     baby.babyBirthday = that.data.year[detail.value.babyYear] + '-' + that.data.month[detail.value.babyMonth]
     that.data.customer.baby.push(baby)
     // 下一页
-    that.onSwiper()
+    if(!that.data.isAddBabyInfo){
+      // isAddBabyInfo为false，不添加,直接进入下一页
+      that.onSwiper()
+    }
+    
   },
-   // 点击省份页
+  formReset(e) {
+    console.log('form发生了reset事件，携带数据为：', e)
+    this.setData({
+      chosen: ''
+    })
+  },
+  // 添加宝宝信息，isAddBabyInfo为false，不添加
+  addBaby(event){
+    let that = this
+    that.setData({
+      isAddBabyInfo: true
+    })
+    this.submitBabyInfo(event) //
+  },
+  // 点击省份页
   submitRegion(event){
     let that = this
     const {detail} = event;

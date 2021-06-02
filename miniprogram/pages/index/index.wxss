@@ -131,6 +131,11 @@ button{
     margin: 20px 0;
     align-items: center;
 }
+.swiper-item .addBaby{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 .swiper-item .baby .baby-xingxing{
     height: 100%;
 }
