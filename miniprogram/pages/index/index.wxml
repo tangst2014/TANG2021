@@ -22,7 +22,7 @@
                 <view class="swiper-item">
                     <view>先报上你的大名</view>
                     <view class="l-input-name">
-                        <l-input name="customerName" placeholder="输入你的名字" value="{{customer.customerName}}" width="500" hide-label show-row="{{false}}"/>
+                        <l-input name="customerName" placeholder="输入你的名字" maxlength='20' value="{{customer.customerName}}" width="500" hide-label show-row="{{false}}"/>
                         <view class="name-tips">妈/爸<image class="xingxing" src="/static/noempty.png"></image></view>
                     </view>
                     <view class="w-color w-margin">例子：小明妈/爸</view>
@@ -34,28 +34,28 @@
                 </view>
             </form>
           </swiper-item>
-          <swiper-item  wx:if = "{{swiper.age}}">
-            <form name="customer"  catchsubmit="submitBabyInfo" catchreset="formReset">
+          <swiper-item  wx:if = "{{swiper.baby}}">
+            <form name="customer"  catchsubmit="submitBabyInfo">
                 <view class="swiper-item">
                     <view class="baby-title">吞金兽出生年月</view>
                     <view class="baby">
                         <view class="baby-xingxing"><image class="xingxing" src="/static/noempty.png"></image></view>
                         <text>姓名:</text>
-                        <l-input name="babyName" placeholder="输入宝宝名字" value="{{name}}" width="500" hide-label show-row="{{false}}"/>
+                        <l-input name="babyName" placeholder="输入宝宝名字" maxlength='20' value="{{tempBaby.babyName}}" width="500" hide-label show-row="{{false}}"/>
                         
                     </view>
                     <view class="baby">
                         <view class="baby-xingxing"><image class="xingxing" src="/static/noempty.png"></image></view>
                         <text>生日：</text> 
-                        <picker bindchange="bindPickerYearChange" value="{{yindex}}" range="{{year}}" name="babyYear">
+                        <picker bindchange="bindPickerYearChange" value="{{tempBaby.babyYear}}" range="{{year}}" name="babyYear">
                             <view class="picker">
-                                {{year[yindex]}}
+                                {{tempBaby.babyYear}}
                             </view>    
                         </picker>
                         <view>年</view>
-                        <picker bindchange="bindPickerMonthChange" value="{{mindex}}" range="{{month}}"  name="babyMonth">
+                        <picker bindchange="bindPickerMonthChange" value="{{tempBaby.babyMonth}}" range="{{month}}"  name="babyMonth">
                             <view class="picker">
-                                {{month[mindex]}}
+                                {{tempBaby.babyMonth}}
                             </view>
                         </picker>
                         <view>月</view>
@@ -66,19 +66,23 @@
                     <view class="baby">
                         <view class="baby-xingxing"><image class="xingxing" src="/static/noempty.png"></image></view>
                         <text>性别：</text>
-                        <l-radio-group name="babySex" placement="row" class="l-class" current = "{{baby.babySex}}">
-                            <l-radio key="1">男</l-radio>
-                            <l-radio key="0">女</l-radio>
-                        </l-radio-group>
+                        <radio-group name="babySex">
+                            <label wx:for="{{gender}}" wx:key="index">
+                                <radio value="{{item.value}}" checked="{{selectIndex==index?true:false}}"/>{{item.name}}
+                            </label>
+                        </radio-group>
                     </view>
+                </view>
+                <view class="showBabyName" wx:if="{{customer.baby.length}}">已经添加的宝宝：</view>
+                <view class="showBabyName" wx:for="{{customer.baby}}" wx:key="index">
+                    <view>{{item.babyName}}</view>
                 </view>
                 <view class="button-class">
                     <view class="l-button-class">
-                        <button formType="submit">{{btnSwiper}}</button>
+                        <button formType="submit">{{addbabyText}}</button>
                     </view>
                 </view>
-                <button style="margin: 30rpx 0" formType="reset">Reset</button>
-                <view class="addBaby" catchtap="addBaby"><l-icon name="add"/></view>
+              
             </form>
          </swiper-item>
          <swiper-item  wx:if = "{{swiper.region}}">
@@ -87,8 +91,8 @@
                 <view class="w-bottom">生活在</view>
                     <picker mode="region" bindchange="bindRegionChange" name="customerRegion"  value="{{region}}" custom-item="{{customItem}}">
                         <view class="l-input-name">
-                            <l-input value="{{region[0]}}" width="500" hide-label show-row="{{false}}"/>
-                            <view class="name-tips">省
+                            <l-input value="{{region[0]}},{{region[1]}},{{region[2]}}" width="500" hide-label show-row="{{false}}"/>
+                            <view class="name-tips">省市区
                                 <view class="baby-xingxing"><image class="xingxing" src="/static/noempty.png"></image></view>
                             </view>
                         </view>
@@ -103,27 +107,27 @@
         </swiper-item>
         
         <swiper-item  wx:if = "{{swiper.phone}}">
-          <form name="customer"  catchsubmit="submitPhone">
+          <form name="customer"  catchsubmit="submitForm">
             <view class="swiper-item">
                 <view>创建一个享读ID</view>
                 <view class="l-input-name">
                     <view class="baby-xingxing"><image class="xingxing" src="/static/noempty.png"></image></view>
-                    <text>手机号:</text>
-                    <l-input name="customerPhone" type="number" placeholder="输入手机号" value="{{customer.customerPhone}}" width="500" hide-label show-row="{{false}}"/>
+                    <l-input name="customerPhone" maxlength='11'  placeholder="请输入手机号" value="{{customer.customerPhone}}" bindinput='customerPhoneInput' width="500" hide-label show-row="{{false}}"/>
                 </view>
                 <view class="l-input-name">
                     <view class="baby-xingxing"><image class="xingxing" src="/static/noempty.png"></image></view>
-                    <text>验证码:</text>
-                    <l-input name="Verification" placeholder="输入验证码" value="{{Verification}}" width="500" hide-label show-row="{{false}}"/>
+                    <l-input name="Verification" bindinput="verifyCodePhoneInput" maxlength='4'  placeholder="请输入验证码" value="{{Verification}}" width="500" hide-label show-row="{{false}}"/>
+                    <button disabled="{{verifyCodeBtnDisable}}" bindtap="submitPhone" data-phone="{{customer.customerPhone}}">{{verifyCodeText}}</button>
                 </view>
             </view>
             <view class="button-class">
                 <view class="l-button-class">
-                    <view wx:if="{{!issubmitForm}}"><button formType="submit">{{btnSwiper}}</button></view>
-                    <view wx:else>注册成功</view>
+                    <view><button disabled="{{isSendVerifyCode}}" loading="{{issubmitFormLoading}}" formType="submit">{{btnSubmit}}</button></view>
+                    <view wx:if="{{issubmitFormed}}">注册成功</view>
                 </view>
             </view>
             </form>
+            
           </swiper-item>
           <swiper-item  wx:if = "{{swiper.welcome}}">
             <view class="swiper-item">
@@ -151,7 +155,7 @@ title="请正确填写宝宝信息~"
 <l-toast
 show="{{toastSuccessShow}}"
 icon="success"
-title="保存成功~"
+title="提交成功~"
 />
 <l-toast
 show="{{toastFailShow}}"
@@ -166,7 +170,7 @@ title="保存失败，请检查信息~"
         <view class="customerName">{{customer.customerName}}</view>
         <view class="addCustomeInfo"><l-button bindtap="onAddCustomeInfo" type="success">{{motto}}</l-button></view>
     </view>
-    <view wx:if="{{hasSubmit}}">
+    <view wx:if="{{1}}">
         <view class="official t-margin">
             <text>1,关注公众号</text>
             <view class="t-margin">

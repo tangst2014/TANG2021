@@ -100,7 +100,7 @@ button{
     display: flex;
     flex-direction: row;
     align-items: center;
-    margin-top: 25px;
+    padding-top: 25px;
     border-bottom: 1px solid #d0d0d0;
 }
 .swiper-item .name-tips{
@@ -130,6 +130,12 @@ button{
     flex-direction: row;
     margin: 20px 0;
     align-items: center;
+}
+.showBabyName{
+    margin: 10px 20px;
+    color: red;
+    font-size:40rpx;
+    font-weight: bold;
 }
 .swiper-item .addBaby{
     display: flex;

@@ -22,7 +22,6 @@ App({
         let ratio = 750 / clientWidth
         let rpxHeight = ratio * clientHeight
         that.globalData.rpxHeight = rpxHeight
-        console.log('app.js->rpxHeight',rpxHeight)
       }
      })
     // 用户信息
@@ -53,6 +52,8 @@ App({
    
   },
   globalData : {
+    sendVerifyCode: "https://mall.onelittlestep.net/zms/zms_tools_io/io_sendVerifyCode" , // 获取验证码
+    verifyCode: "https://mall.onelittlestep.net/zms/zms_tools_io/io_verifyCode",  // 手机验证
     customer : {
       baby:[]
     }, // 用户信息
