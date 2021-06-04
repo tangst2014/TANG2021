@@ -1,0 +1,184 @@
+.tips{
+    color:gray;
+}
+.t-margin{
+    margin-top: 20px;
+}
+.w-bottom{
+    margin-bottom: 20px;
+}
+
+.container .customer{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 20px;
+}
+.container  .customer .customerName{
+    color: blue;
+}
+
+.container  .official{
+    margin: 20rpx 30rpx 50rpx 30rpx;
+}
+.container  .babyAddwxGroup{
+    margin: 40rpx 30rpx 50rpx 0rpx;
+
+}
+.group-link{
+    color:red;
+}
+
+.loading{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+}
+.loading .loading-img{
+
+    width: 50px;
+    height: 50px;
+}
+
+/* 以上是之前的版本，最新样式在下面 */
+button{
+    color: #464545;
+}
+.l-class{
+    font-size: 40rpx;
+}
+.w-margin{
+    margin-top: 30rpx;
+}
+.w-color{
+    color:gray;
+}
+.xingxing{
+    width: 38rpx;
+    height: 38rpx;
+}
+.button-class{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.l-button-class{
+    position: absolute;
+    bottom: 90px;
+}
+.addBaby{
+    position: relative;
+}
+.addBaby-button-class{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 32px;
+
+}
+
+.container{
+    margin: 0 15px;
+    font-size: 40rpx;
+    color: rgb(44, 44, 43);
+}
+.container .swiper-item{
+    margin-top: 30px;
+}
+.container .swiper-item .wxtap{
+    display: flex;
+    flex-direction: column;
+}
+.container .swiper-item .wxtap .wxtap-tips{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 50rpx;
+    color: red;
+    font-stretch: bold;
+}
+
+.container .swiper-item .wxtap .wxtap-tips .image{
+    width: 50px;
+    height: 50px;
+}
+.container .swiper-item .wxtip{
+    margin-top: 242rpx;
+    display: flex;
+    flex-direction: column;
+}
+
+.swiper-item .l-input-name{
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-top: 25px;
+    border-bottom: 1px solid #d0d0d0;
+}
+.swiper-item .l-input-name .input-verification{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+.swiper-item .name-tips{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    position: absolute;
+    right: 0;
+    bottom: 0px;
+}
+
+.swiper-item .baby-title{
+    text-align: center;
+}
+.swiper-item .picker{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding:10px 0;
+    width: 166rpx;
+    height: 40rpx;
+    border-bottom: 1px solid #d0d0d0;
+}
+.swiper-item .baby{
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    margin: 20px 0;
+    align-items: center;
+}
+.swiper-item .baby-babySex{
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 30px;
+}
+.swiper-item .baby-babySex .radio{
+    margin: 0 10px;
+}
+.showBaby{
+    margin-top: 123rpx;
+}
+.showBaby .showBabyName{
+    margin: 10px 20px;
+    color: rgb(112, 110, 110);
+    font-size:25rpx;
+}
+.swiper-item .addBaby{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.swiper-item .baby .baby-xingxing{
+    height: 100%;
+}
+.welcome{
+    font-size: 50rpx;
+    color: red;
+    font-stretch: bold;
+}

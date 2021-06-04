@@ -1,3 +1,4 @@
+// 该页只添加信息，不做update
 const app = getApp().globalData
 import util from "../../utils/util.js";
 import wxRequest from "../../utils/wxRequest.js";

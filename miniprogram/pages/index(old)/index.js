@@ -1,5 +1,3 @@
-// 该页只添加信息，不做update
-// 跳转该页，有用户信息，且有OPENID
 const app = getApp().globalData
 import util from "../../utils/util.js";
 import wxRequest from "../../utils/wxRequest.js";
@@ -30,6 +28,7 @@ Page({
       ] 
     },
 
+    isAdd: true, // 判断是添加信息还是修改，true为添加信息,false为修改
     gender: [
       {name: '男', value: '1', checked:'false'},
       {name: '女', value: '0', checked:'false'}
@@ -69,10 +68,9 @@ Page({
     customItem: '全部',
     // 手机页
     verifyCodeText: "获取验证码",
-    
+    verifyCodeBtnDisable: false, // 是否点击获取验证码，避免重复获取
     isSendVerifyCode: true, //提交按钮是否有效，手机输入11位，同时验证码输入4位，提交按钮才有效
-    isPhoneRight: false,  //手机输入11位,手机号是否正确，11位默认正确
-    verifyCodeBtnDisable: true, // 是否禁用获取验证码按钮
+    isPhoneRight: true,  //手机输入11位
     isVerifyCodeRight: false ,  //验证码输入4位
     issubmitFormLoading: false, // 是否显示提交中。。
     issubmitFormed: false, // 注册成功
@@ -81,6 +79,14 @@ Page({
   onLoad: function() {
     let that = this 
 
+    // 初始化openid,之前获取openid一直失败，这加入try，catch看看原因,好像加入try，catch才能获取，待查
+
+    if(!app.openid){
+      console.log("onload 没有openid，getOpenid")
+      that.getOpenid()
+    }
+   
+    
     // 初始化年选择器内容
     let timestamp = Date.parse(new Date());
     let date = new Date(timestamp);
@@ -95,9 +101,220 @@ Page({
       that.data.year.push(i)
     }
     that.setData({year:that.data.year})
-    
-  },
 
+    // 修改次数提醒
+    if(app.editCount<1){
+      wx.showToast({
+        title: '请勿恶意提交',
+        icon: 'error',
+      })
+      app.editCount = 3
+    }
+    
+    // 用户信息
+    console.log('☀ index.js ▌ onLoad app.customer : ', app.customer)
+    if(app.customer.baby.length){
+       // 1，查询本地用户信息
+       // 计算年龄
+       let age = 0
+       for(var i=0;i<app.customer.baby.length;i++){
+         age = this.getAge(app.customer.baby[i].babyBirthday)
+         app.customer.baby[i].age = age
+       }
+       console.log('app.customer',app.customer)
+       that.setData({
+         customer: app.customer,
+         isAdd: false
+       })
+       //测试
+       that.setData(
+        {
+          'swiper.name': true,
+          'swiper.baby': true,
+          'swiper.region': true,
+          'swiper.phone': true,
+          'swiper.welcome': true,
+          'swiper.btn':true,
+          addbabyText: '继续添加',
+          btnSwiper: '保存'
+         }
+       )
+
+       // 后台重新刷新本地缓存
+       this.getCustomerDataNoOpenid()
+    }else{
+      // 2，没有本地信息
+      // 查询数据库，有openid,直接查询；没有openid,先获取opendi
+      // 
+      if(!app.openid){
+        // app.openid为空或undefined
+        that.getCustomerDataNoOpenid()
+      }else{
+        // 登陆过
+        that.getCustomerData(app.openid)
+      }
+    }
+  },
+  getOpenid(){
+    try{
+      wx.cloud.callFunction({    //添加livingHistory表记录
+        name: 'login',
+        success: res => {
+          // 存储用户id信息
+          console.log('☀ index.js onLoad ▌ 获取OPENID :', res.result)
+          app.openid = res.result.openid
+          app.unionid = res.result.unionid
+          wx.setStorage({
+            data: app.openid,
+            key: 'openid',
+          })
+          wx.setStorage({
+            data: app.unionid,
+            key: 'unionid',
+          })
+         
+        },
+        fail: err => {
+          console.log('☀ index.js onLoad ▌ 获取OPENID失败 :', err)
+        }
+      })
+    }catch(err){
+      console.log('☀ index.js onLoad ▌ 获取OPENID失败 :', err)
+    }
+  },
+  // 获取用户信息
+  getCustomerData(openid){
+    var that = this
+    if(openid ==''){
+      console.log('☀ login.js ▌ openid 为空，不能获取用户信息')
+      return
+    }
+    getCustomerInfo.where({
+      _openid: app.openid
+    })
+    .get({
+      success: res => {
+        console.log('☀ index.js ▌ getCustomerData 查询用户信息 : ', res.data)
+        that.data.isGetCustomer = true // 成功查询过
+        if(res.data.length){
+          app.customer = res.data[0]
+          // 计算年龄
+          let age = 0
+          for(var i=0;i<app.customer.baby.length;i++){
+            age = this.getAge(app.customer.baby[i].babyBirthday)
+            app.customer.baby[i].age = age
+          }
+          that.setData({
+            customer:app.customer,
+            isAdd: false
+          })
+          wx.setStorage({
+            data: res.data[0],
+            key: 'customer',
+          })
+          //测试
+          that.setData({
+              'swiper.name': true,
+              'swiper.baby': true,
+              'swiper.region': true,
+              'swiper.phone': true,
+              'swiper.welcome': true,
+              'swiper.btn':true,
+              addbabyText: '继续添加',
+              btnSwiper: '保存'
+            })
+        }else{
+          // 没有查询到数据
+          app.customer = {
+            baby:[]
+          } // 用户信息
+          that.setData({
+            customer:app.customer,
+          })
+          wx.setStorage({
+            data: app.customer,
+            key: 'customer',
+          })
+        }
+      },
+      fail: err => {
+        console.log('☀ index.js onload ▌ getCustomerInfoFun 查询用户数据失败   ☞  ',err)
+      }
+
+    })
+  },
+  // 获取用户OPENID，unionid
+  getCustomerDataNoOpenid(){
+    var that = this
+    wx.cloud.callFunction({    //添加livingHistory表记录
+      name: 'login',
+      success: res => {
+        // 存储用户id信息
+        app.openid = res.result.openid
+        app.unionid = res.result.unionid
+        wx.setStorage({
+          data: app.openid,
+          key: 'openid',
+        })
+        wx.setStorage({
+          data: app.unionid,
+          key: 'unionid',
+        })
+        that.getCustomerData(app.openid)
+      },
+      fail: err => {
+        console.log('☀ login.js ▌ fail :', err)
+      }
+    })
+  },
+  // 根据出生日期计算年龄周岁
+  getAge(strBirthday){
+      let yearAge = 0
+      let mouthAge = 0
+      let strBirthdayArr = strBirthday.split("-");
+      let birthYear = strBirthdayArr[0];
+      let birthMonth = strBirthdayArr[1];
+      let birthDay = strBirthdayArr[2];
+      let d = new Date();
+      let nowYear = d.getFullYear();
+      let nowMonth = d.getMonth() + 1;
+      let nowDay = d.getDate();
+      if (nowYear == birthYear) {
+        // yearAge = 0; //同年 则为0岁
+        let monthDiff = nowMonth - birthMonth; //月之差 
+        if (monthDiff < 0) {
+          return yearAge = -1; //返回-1 表示出生日期输入错误 晚于今天
+        } else {
+          mouthAge = monthDiff;
+        }
+      } else {
+        let ageDiff = nowYear - birthYear; //年之差
+        if (ageDiff > 0) {
+          if (nowMonth == birthMonth) {
+            let dayDiff = nowDay - birthDay; //日之差 
+            if (dayDiff < 0) {
+              yearAge = ageDiff - 1 ;
+            } else {
+              yearAge = ageDiff;
+            }
+          } else {
+            let monthDiff = nowMonth - birthMonth; //月之差 
+            if (monthDiff < 0) {
+              yearAge = ageDiff - 1;
+            } else {
+              mouthAge = monthDiff;
+              yearAge = ageDiff;
+            }
+          }
+        } else {
+          return yearAge = -1; //返回-1 表示出生日期输入错误 晚于今天
+        }
+      }
+      let age = {}
+      age.yearAge= yearAge
+      age.mouthAge = mouthAge
+      return age; //返回周岁年龄+月份
+  },
   // 跳转到公众号
   addwxGroup(e){
     let index = e.currentTarget.dataset.index
@@ -143,7 +360,7 @@ Page({
       url: '/pages/wxGroupFour/wxGroupFour',
     })
   },
-  // 表单分页
+  // 分页，点点点
   changeIndicatorDots() {
     this.setData({
       indicatorDots: !this.data.indicatorDots
@@ -205,6 +422,7 @@ Page({
     })
   },
   getUserProfile(e) {
+
     var　that = this 
     // 获取用户信息，开发者每次通过该接口获取用户个人信息均需用户确认，开发者妥善保管用户快速填写的头像昵称，避免重复弹窗
     wx.getUserProfile({
@@ -237,7 +455,15 @@ Page({
   // 点击名字页
   submitName(event){
     let that = this
+    //测试
+    if(that.data.btnSwiper=="保存"){
+      wx.showToast({
+        title: '已保存',
+      })
+    }
+    
     const {detail} = event;
+
     //中英文姓名验证(考虑到少数名族和外国人名字很长)：
     if (!(/^[\u4E00-\u9FA5A-Za-z]+$/.test(detail.value.customerName))) {
         wx.showToast({
@@ -257,9 +483,12 @@ Page({
     }
     that.data.customer.customerName = detail.value.customerName
     // 下一页
+    
     that.onSwiper()
 
   },
+
+  
   // 点击宝宝页
   submitBabyInfo(event){
     let that = this
@@ -317,7 +546,7 @@ Page({
       });
       return
     }
-
+   
     // 添加
     this.addBaby(baby)
 
@@ -368,30 +597,20 @@ Page({
   // isPhoneRight: false,  //手机输入11位
   // isVerifyCodeRight: false ,//验证码输入4位
   customerPhoneInput:function(e){
-
+    console.log(this.data.isVerifyCodeRight,this.data.isPhoneRight)
       var customerPhone = e.detail.value
+
       if(e.detail.value.length==11){
-        //正则验证
-        if (!(/^((13[0-9])|(14[0-9])|(15[0-9])|(17[0-9])|(18[0-9]))\d{8}$/.test(e.detail.value))) {
-            wx.showToast({
-            title: '手机号码有误',
-            duration: 2000,
-            icon:'none'
-            });
-            return
-        }
         this.setData({
           'customer.customerPhone': customerPhone,
-           isPhoneRight: true,
-           verifyCodeBtnDisable: false
+           isPhoneRight: true
         })
       }else{
         this.setData({
-           isPhoneRight: false,
-           verifyCodeBtnDisable: true
+           isPhoneRight: false
         })
       }
-
+      console.log(this.data.isVerifyCodeRight,this.data.isPhoneRight)
       if(this.data.isVerifyCodeRight && this.data.isPhoneRight){
         this.setData({
           isSendVerifyCode : false // 手机号11位，验证码4位，提交有效
@@ -401,10 +620,13 @@ Page({
           isSendVerifyCode : true // 手机号11位，验证码4位，提交有效
         })
       }
+      
   },
   // 验证码，输入4位验证码，提交按钮才有效
   verifyCodePhoneInput:function(e){
+    console.log('verifyCodePhoneInput',this.data.isVerifyCodeRight,this.data.isPhoneRight)
     // 最大长度4
+
     if(e.detail.value.length==4){
       this.setData({
         isVerifyCodeRight: true
@@ -496,6 +718,7 @@ Page({
       }
       var verifyCode = wxRequest.getRequest(url, args)
       verifyCode.then((res) => {
+        
         console.log('index.js | submitForm verifyCode: ', res.data)
         // rst: "1", msg: "验证通过"
         //rst: "0", msg: "验证失败"}
@@ -506,6 +729,11 @@ Page({
             that.data.customer.userInfo =  app.userInfo
             console.log('☀ index.js ▌ submit 提交到数据库的信息 :',that.data.customer)
             that.addCustomerInfo()
+            wx.setStorage({
+              data:  that.data.customer,
+              key: 'customer',
+            })
+           
         }else{
           wx.showToast({
             title: '手机验证失败！',
@@ -519,10 +747,32 @@ Page({
         }
       })
   },
-  // 添加
+  // 表单提交
   addCustomerInfo(){
     var that = this
     that.setData({show:true})
+    if(that.data.isAdd){
+      // 添加信息
+      that.addFormData()
+    }else{
+      // 修改信息
+      that.editFormData()
+    }
+  },
+  // 提交到数据库
+  addFormData(){
+    var that = this
+    if(app.openid){
+      // openid已经获取
+      that.hasOpenidAdd()
+    }else{
+      // openi没有获取
+      that.hasNoOpenidAdd()
+    }
+  },
+  // 有open时添加
+  hasOpenidAdd(){
+    var that = this
     //openid有值
     let time = util.formatTime(new Date)  // 获取当前最新时间,
     wx.cloud.callFunction({    //添加livingHistory表记录
@@ -545,9 +795,14 @@ Page({
           issubmitFormLoading:false , //加载中取消
           toastSuccessShow:true
         })
-
-        that.onSwiper()  // T添加成功过跳转H5
-
+      
+       
+        that.onSwiper()  
+        app.customer = this.data.customer
+        wx.setStorage({
+          data: that.data.customer,
+          key: 'customer',
+        })
       },
       fail: err => {
         console.log('注册失败err： ',err)
@@ -556,5 +811,73 @@ Page({
         }) 
       }
     })
-  }
+  },
+  // 没有open时添加
+  hasNoOpenidAdd(){
+    var that = this
+    wx.cloud.callFunction({    //添加livingHistory表记录
+      name: 'login',
+      success: res => {
+        // 存储用户id信息
+        app.openid = res.result.openid
+        app.unionid = res.result.unionid
+        that.hasOpenidAdd()  // 提交数据
+        wx.setStorage({
+          data: app.openid,
+          key: 'openid',
+        })
+        wx.setStorage({
+          data: app.unionid,
+          key: 'unionid',
+        })
+       
+      },
+      fail: err => {
+        console.log('☀ index.js ▌ 提交时获取OPENID失败 :', err)
+      }
+    })
+  },
+  editFormData(){
+    var that = this
+    app.editCount--
+    if(app.editCount<1){
+      that.setData({show:false})
+      wx.showToast({
+        icon: 'error',
+        title: '请勿恶意提交',
+      })
+      return   
+    }
+    wx.cloud.callFunction({    //添加livingHistory表记录
+      name: 'editCustomerInfo',
+      data: {
+        _id: that.data.customer._id,
+        customerName :  that.data.customer.customerName,
+        customerPhone : that.data.customer.customerPhone,
+        customerAddress :  that.data.customer.customerRegion,
+        baby: that.data.customer.baby,
+      },
+      success: res => {
+        console.log('修改成功： ',res)
+        that.setData({
+          issubmitFormed: true, //修改成功
+          issubmitFormLoading:false , //加载中取消
+          toastSuccessShow:true
+        })
+        that.onSwiper()
+
+        app.customer = this.data.customer
+        wx.setStorage({
+          data: that.data.customer,
+          key: 'customer',
+        })
+      },
+      fail: err => {
+        console.log('修改失败： ',err)
+        that.setData({
+          toastFailShow:true
+        })
+      }
+    })
+  },
 })
