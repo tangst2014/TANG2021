@@ -22,7 +22,7 @@
                 <view class="swiper-item">
                     <view>先报上你的大名</view>
                     <view class="l-input-name">
-                        <l-input name="customerName" placeholder="输入你的名字" maxlength='20' value="{{customer.customerName}}" width="500" hide-label show-row="{{false}}"/>
+                        <l-input name="customerName" placeholder="输入你的名字" maxlength='20' value="{{customer.customerName}}" width="500" type='text' confirm-type="完成" confirm-hold="{{true}}" hide-label show-row="{{false}}"/>
                         <view class="name-tips">妈/爸<image class="xingxing" src="/static/noempty.png"></image></view>
                     </view>
                     <view class="w-color w-margin">例子：小明妈/爸</view>
@@ -36,12 +36,12 @@
           </swiper-item>
           <swiper-item  wx:if = "{{swiper.baby}}">
             <form name="customer"  catchsubmit="submitBabyInfo">
-                <view class="swiper-item">
+                <view class="swiper-item addBaby">
                     <view class="baby-title">吞金兽出生年月</view>
                     <view class="baby">
                         <view class="baby-xingxing"><image class="xingxing" src="/static/noempty.png"></image></view>
                         <text>姓名:</text>
-                        <l-input name="babyName" placeholder="输入宝宝名字" maxlength='20' value="{{tempBaby.babyName}}" width="500" hide-label show-row="{{false}}"/>
+                        <l-input name="babyName" placeholder="输入宝宝名字" maxlength='20' value="{{tempBaby.babyName}}" type='text' confirm-type="完成" confirm-hold="{{true}}" width="500" hide-label show-row="{{false}}"/>
                         
                     </view>
                     <view class="baby">
@@ -63,25 +63,29 @@
                     </view>
                     
                     
-                    <view class="baby">
+                    <view class="baby-babySex">
                         <view class="baby-xingxing"><image class="xingxing" src="/static/noempty.png"></image></view>
                         <text>性别：</text>
                         <radio-group name="babySex">
-                            <label wx:for="{{gender}}" wx:key="index">
+                            <label class="radio" wx:for="{{gender}}" wx:key="index">
                                 <radio value="{{item.value}}" checked="{{selectIndex==index?true:false}}"/>{{item.name}}
                             </label>
                         </radio-group>
                     </view>
-                </view>
-                <view class="showBabyName" wx:if="{{customer.baby.length}}">已经添加的宝宝：</view>
-                <view class="showBabyName" wx:for="{{customer.baby}}" wx:key="index">
-                    <view>{{item.babyName}}</view>
-                </view>
-                <view class="button-class">
-                    <view class="l-button-class">
-                        <button formType="submit">{{addbabyText}}</button>
+                    <view class="addBaby-button-class">
+                        <view class="l-addBaby-button-class">
+                            <button formType="submit">{{addbabyText}}</button>
+                        </view>
                     </view>
                 </view>
+                
+                
+                <view class="showBaby">
+                    <view class="showBabyName" wx:for="{{customer.baby}}" wx:key="index">
+                        <view>第{{index+1}}个宝宝：{{item.babyName}}</view>
+                    </view>
+                </view>
+                
               
             </form>
          </swiper-item>
@@ -91,7 +95,7 @@
                 <view class="w-bottom">生活在</view>
                     <picker mode="region" bindchange="bindRegionChange" name="customerRegion"  value="{{region}}" custom-item="{{customItem}}">
                         <view class="l-input-name">
-                            <l-input value="{{region[0]}},{{region[1]}},{{region[2]}}" width="500" hide-label show-row="{{false}}"/>
+                            <l-input value="{{region[0]}},{{region[1]}},{{region[2]}}" width="500" hide-label show-row="{{false}}" disabled="{{true}}"/>
                             <view class="name-tips">省市区
                                 <view class="baby-xingxing"><image class="xingxing" src="/static/noempty.png"></image></view>
                             </view>
@@ -112,18 +116,20 @@
                 <view>创建一个享读ID</view>
                 <view class="l-input-name">
                     <view class="baby-xingxing"><image class="xingxing" src="/static/noempty.png"></image></view>
-                    <l-input name="customerPhone" maxlength='11'  placeholder="请输入手机号" value="{{customer.customerPhone}}" bindinput='customerPhoneInput' width="500" hide-label show-row="{{false}}"/>
+                    <l-input name="customerPhone" maxlength='11'  placeholder="请输入手机号" value="{{customer.customerPhone}}" bind:lininput='customerPhoneInput' type='number'  confirm-hold="{{true}}" width="500" hide-label show-row="{{false}}"/>
                 </view>
                 <view class="l-input-name">
                     <view class="baby-xingxing"><image class="xingxing" src="/static/noempty.png"></image></view>
-                    <l-input name="Verification" bindinput="verifyCodePhoneInput" maxlength='4'  placeholder="请输入验证码" value="{{Verification}}" width="500" hide-label show-row="{{false}}"/>
-                    <button disabled="{{verifyCodeBtnDisable}}" bindtap="submitPhone" data-phone="{{customer.customerPhone}}">{{verifyCodeText}}</button>
+                    <view class="input-verification">
+                        <l-input name="Verification" bind:lininput="verifyCodePhoneInput" maxlength='4'  placeholder="请输入验证码" value="{{Verification}}" type='number'  confirm-hold="{{true}}" hide-label show-row="{{false}}"/>
+                        <button disabled="{{verifyCodeBtnDisable}}" bindtap="submitPhone" data-phone="{{customer.customerPhone}}">{{verifyCodeText}}</button>
+                    </view>
                 </view>
             </view>
             <view class="button-class">
                 <view class="l-button-class">
                     <view><button disabled="{{isSendVerifyCode}}" loading="{{issubmitFormLoading}}" formType="submit">{{btnSubmit}}</button></view>
-                    <view wx:if="{{issubmitFormed}}">注册成功</view>
+                    <view class="button-class" wx:if="{{issubmitFormed}}">注册成功</view>
                 </view>
             </view>
             </form>
@@ -135,10 +141,24 @@
                 <view class="t-margin">
                     <official-account bindload="officialLoad" binderror="officialError"></official-account>
                     <view wx:if="{{noGetOfficial}}">
-                        <view bindtap="onOfficialArticle">点我，关注公号，获取二维码</view>
+                        <view class="group-link" bindtap="onOfficialArticle">点我，关注公号，获取二维码</view>
                     </view>
                 </view>
+                <view class="babyAddwxGroup">
+                    <text>关注微信群</text>
+                    <view wx:for="{{customer.baby}}" wx:key="index" wx:for-item='baby' class="tips t-margin">
+                        <block wx:if="{{baby.age.yearAge!=0}}">
+                            <text>宝宝{{baby.babyName}}，现在{{baby.age.yearAge}}岁{{baby.age.mouthAge}}个月，建议加入下面群</text>
+                        </block>
+                        <block wx:else>
+                            <text>宝宝{{baby.babyName}}，现在{{baby.age.mouthAge}}个月，建议加入下面群</text>
+                        </block>
+                        <view bindtap="addwxGroup" data-index="{{index}}">
+                            <view class="t-margin group-link">点我了解详情</view>
+                        </view>
+                    </view>
                 </view>
+            </view>
           </swiper-item>
       </swiper>
   </view>

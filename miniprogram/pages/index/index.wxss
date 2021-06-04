@@ -22,9 +22,13 @@
     margin: 20rpx 30rpx 50rpx 30rpx;
 }
 .container  .babyAddwxGroup{
-    margin: 20rpx 30rpx 50rpx 30rpx;
+    margin: 40rpx 30rpx 50rpx 0rpx;
 
 }
+.group-link{
+    color:red;
+}
+
 .loading{
     display: flex;
     justify-content: center;
@@ -63,11 +67,21 @@ button{
     position: absolute;
     bottom: 90px;
 }
+.addBaby{
+    position: relative;
+}
+.addBaby-button-class{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 32px;
+
+}
+
 .container{
     margin: 0 15px;
     font-size: 40rpx;
-    color: rgb(29, 28, 28);
-   
+    color: rgb(44, 44, 43);
 }
 .container .swiper-item{
     margin-top: 30px;
@@ -103,6 +117,12 @@ button{
     padding-top: 25px;
     border-bottom: 1px solid #d0d0d0;
 }
+.swiper-item .l-input-name .input-verification{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
 .swiper-item .name-tips{
     display: flex;
     flex-direction: row;
@@ -120,7 +140,7 @@ button{
     justify-content: center;
     align-items: center;
     padding:10px 0;
-    width: 50px;
+    width: 166rpx;
     height: 40rpx;
     border-bottom: 1px solid #d0d0d0;
 }
@@ -131,11 +151,23 @@ button{
     margin: 20px 0;
     align-items: center;
 }
-.showBabyName{
+.swiper-item .baby-babySex{
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 30px;
+}
+.swiper-item .baby-babySex .radio{
+    margin: 0 10px;
+}
+.showBaby{
+    margin-top: 123rpx;
+}
+.showBaby .showBabyName{
     margin: 10px 20px;
-    color: red;
-    font-size:40rpx;
-    font-weight: bold;
+    color: rgb(112, 110, 110);
+    font-size:25rpx;
 }
 .swiper-item .addBaby{
     display: flex;

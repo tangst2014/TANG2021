@@ -70,7 +70,7 @@ Page({
     verifyCodeText: "获取验证码",
     verifyCodeBtnDisable: false, // 是否点击获取验证码，避免重复获取
     isSendVerifyCode: true, //提交按钮是否有效，手机输入11位，同时验证码输入4位，提交按钮才有效
-    isPhoneRight: false,  //手机输入11位
+    isPhoneRight: true,  //手机输入11位
     isVerifyCodeRight: false ,  //验证码输入4位
     issubmitFormLoading: false, // 是否显示提交中。。
     issubmitFormed: false, // 注册成功
@@ -597,6 +597,7 @@ Page({
   // isPhoneRight: false,  //手机输入11位
   // isVerifyCodeRight: false ,//验证码输入4位
   customerPhoneInput:function(e){
+    console.log(this.data.isVerifyCodeRight,this.data.isPhoneRight)
       var customerPhone = e.detail.value
 
       if(e.detail.value.length==11){
@@ -609,6 +610,7 @@ Page({
            isPhoneRight: false
         })
       }
+      console.log(this.data.isVerifyCodeRight,this.data.isPhoneRight)
       if(this.data.isVerifyCodeRight && this.data.isPhoneRight){
         this.setData({
           isSendVerifyCode : false // 手机号11位，验证码4位，提交有效
@@ -622,6 +624,7 @@ Page({
   },
   // 验证码，输入4位验证码，提交按钮才有效
   verifyCodePhoneInput:function(e){
+    console.log('verifyCodePhoneInput',this.data.isVerifyCodeRight,this.data.isPhoneRight)
     // 最大长度4
 
     if(e.detail.value.length==4){
@@ -792,6 +795,7 @@ Page({
           issubmitFormLoading:false , //加载中取消
           toastSuccessShow:true
         })
+      
        
         that.onSwiper()  
         app.customer = this.data.customer
